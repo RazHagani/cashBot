@@ -16,7 +16,7 @@ export default async function AppLayout({
     <div className="min-h-screen">
       <AppHeader email={user?.email} />
 
-      <main className="mx-auto max-w-6xl px-4 py-8 md:px-6">
+      <main className="mx-auto max-w-6xl px-4 py-5 md:px-6 md:py-8">
         <div className="rounded-3xl border border-zinc-200/70 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-950/80 md:p-6">
           <div className="flex items-center justify-end">
             <form

@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>cashBot — מדריך התחברות וחיבור לטלגרם</title>
+    <style>
+      :root {
+        --bg: #0b0f19;
+        --card: rgba(255, 255, 255, 0.06);
+        --border: rgba(255, 255, 255, 0.12);
+        --text: #f8fafc;
+        --muted: rgba(248, 250, 252, 0.72);
+        --accent: #8b5cf6;
+        --accent2: #10b981;
+        --danger: #fb7185;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Apple Color Emoji",
+          "Segoe UI Emoji";
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background: radial-gradient(900px 500px at 20% 0%, rgba(139, 92, 246, 0.25), transparent 60%),
+          radial-gradient(900px 500px at 80% 0%, rgba(16, 185, 129, 0.18), transparent 55%),
+          radial-gradient(900px 600px at 90% 20%, rgba(251, 113, 133, 0.16), transparent 55%), var(--bg);
+      }
+
+      a {
+        color: var(--text);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 28px 18px 40px;
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        width: 46px;
+        height: 46px;
+        border-radius: 18px;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        background: rgba(255, 255, 255, 0.92);
+        color: #0b0f19;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+      }
+      .brand h1 {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.2;
+      }
+      .brand p {
+        margin: 3px 0 0;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--accent2);
+      }
+
+      .card {
+        border: 1px solid var(--border);
+        background: var(--card);
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+        backdrop-filter: blur(10px);
+      }
+
+      .hero {
+        padding: 22px;
+        border-radius: 22px;
+      }
+
+      .hero h2 {
+        margin: 0;
+        font-size: 26px;
+        letter-spacing: -0.2px;
+      }
+      .hero p {
+        margin: 10px 0 0;
+        color: var(--muted);
+        line-height: 1.6;
+        font-size: 14px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-top: 14px;
+      }
+      @media (min-width: 840px) {
+        .grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .section h3 {
+        margin: 0 0 10px;
+        font-size: 16px;
+      }
+
+      .links {
+        display: grid;
+        gap: 10px;
+      }
+
+      .qrgrid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 1fr;
+        margin-top: 10px;
+      }
+      @media (min-width: 520px) {
+        .qrgrid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .qrcard {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.18);
+      }
+      .qrcard img {
+        width: 112px;
+        height: 112px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+      }
+      .qrcard .meta {
+        display: grid;
+        gap: 6px;
+      }
+      .qrcard .title {
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .qrcard .hint {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .linkbox {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px;
+        background: rgba(0, 0, 0, 0.18);
+      }
+      .linkbox .label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .linkbox .value {
+        font-family: var(--mono);
+        font-size: 13px;
+        direction: ltr;
+        text-align: left;
+        padding: 8px 10px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        overflow-wrap: anywhere;
+      }
+
+      ol {
+        margin: 10px 0 0;
+        padding: 0 18px 0 0;
+        color: var(--text);
+        line-height: 1.7;
+        font-size: 14px;
+      }
+      li {
+        margin: 8px 0;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .chip {
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 8px 10px;
+        font-size: 13px;
+        font-family: var(--mono);
+        direction: rtl;
+      }
+
+      .tip {
+        margin-top: 12px;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        background: rgba(16, 185, 129, 0.10);
+        border-radius: 16px;
+        padding: 12px 14px;
+        color: rgba(236, 253, 245, 0.92);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .warn {
+        margin-top: 12px;
+        border: 1px solid rgba(251, 113, 133, 0.38);
+        background: rgba(251, 113, 133, 0.10);
+        border-radius: 16px;
+        padding: 12px 14px;
+        color: rgba(255, 228, 230, 0.92);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .footer {
+        margin-top: 16px;
+        color: var(--muted);
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      /* Print to PDF */
+      @page {
+        size: A4;
+        margin: 14mm;
+      }
+      @media print {
+        :root {
+          --bg: #ffffff;
+          --card: #ffffff;
+          --border: rgba(0, 0, 0, 0.12);
+          --text: #0b1220;
+          --muted: rgba(11, 18, 32, 0.70);
+          --accent: #6d28d9;
+          --accent2: #059669;
+          --danger: #e11d48;
+        }
+
+        body {
+          background: #fff !important;
+        }
+
+        .card {
+          box-shadow: none !important;
+          backdrop-filter: none !important;
+        }
+
+        a {
+          color: #0b1220 !important;
+          text-decoration: underline !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="top">
+        <div class="brand">
+          <div class="logo">cb</div>
+          <div>
+            <h1>cashBot</h1>
+            <p>מדריך התחברות וחיבור לטלגרם</p>
+          </div>
+        </div>
+        <div class="pill"><span class="dot"></span> גוגל בלבד · Telegram Sync · פרטיות מלאה</div>
+      </div>
+
+      <div class="card hero">
+        <h2>ברוכים הבאים!</h2>
+        <p>
+          cashBot עוזר לך לעקוב אחרי הוצאות והכנסות בצורה פשוטה, עם דשבורד ברור ובוט בטלגרם שמאפשר להוסיף טרנזקציות בהודעה קצרה.
+        </p>
+      </div>
+
+      <div class="grid">
+        <div class="card section">
+          <h3>קישורים</h3>
+          <div class="links">
+            <div class="linkbox">
+              <div class="label">האתר</div>
+              <div class="value"><a href="https://cash-bot-web.vercel.app/">https://cash-bot-web.vercel.app/</a></div>
+            </div>
+            <div class="linkbox">
+              <div class="label">הבוט בטלגרם</div>
+              <div class="value"><a href="https://t.me/Raz_cash_bot">https://t.me/Raz_cash_bot</a></div>
+            </div>
+          </div>
+
+          <div class="qrgrid">
+            <div class="qrcard">
+              <img
+                alt="QR לאתר"
+                src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fcash-bot-web.vercel.app%2F"
+              />
+              <div class="meta">
+                <div class="title">סריקה לאתר</div>
+                <div class="hint">פתח/י מצלמה בטלפון וסרוק/י את ה‑QR כדי לפתוח את האתר בלי להקליד.</div>
+              </div>
+            </div>
+            <div class="qrcard">
+              <img
+                alt="QR לבוט טלגרם"
+                src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Ft.me%2FRaz_cash_bot"
+              />
+              <div class="meta">
+                <div class="title">סריקה לבוט</div>
+                <div class="hint">סרוק/י כדי לפתוח את הבוט בטלגרם ישר לצ׳אט.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card section">
+          <h3>1) כניסה לאתר (רק עם Google)</h3>
+          <ol>
+            <li>היכנס/י לאתר.</li>
+            <li>לחץ/י <b>“התחל עם Google”</b>.</li>
+            <li>בחר/י חשבון Google ואשר/י.</li>
+            <li>אחרי הכניסה תגיע/י לדשבורד.</li>
+          </ol>
+        </div>
+
+        <div class="card section">
+          <h3>2) חיבור הבוט לטלגרם (פעם אחת)</h3>
+          <ol>
+            <li>באתר: כנס/י ל‑<b>Settings / הגדרות</b>.</li>
+            <li>מצא/י את החלק <b>Telegram Sync</b>.</li>
+            <li>לחץ/י על <b>Generate / Create Sync Code</b> וקבל/י <b>קוד סנכרון חד‑פעמי</b>.</li>
+            <li>בטלגרם: פתח/י את הבוט ולחץ/י <b>Start</b>.</li>
+            <li>שלח/י לבוט את קוד הסנכרון (כהודעה רגילה).</li>
+            <li>הבוט יאשר שהחיבור הצליח — וזהו.</li>
+          </ol>
+          <div class="tip">
+            טיפ: אם הבוט אומר “קוד לא תקין / פג תוקף” — חוזרים לאתר ומייצרים קוד חדש, ואז שולחים שוב.
+          </div>
+        </div>
+
+        <div class="card section">
+          <h3>3) שימוש יומיומי בבוט</h3>
+          <div style="color: var(--muted); font-size: 13px; line-height: 1.6">
+            אחרי החיבור, אפשר לשלוח לבוט הודעה קצרה והוא ישמור אותה בדשבורד.
+          </div>
+          <div class="chips">
+            <div class="chip">פיצה 20</div>
+            <div class="chip">אובר 35</div>
+            <div class="chip">משכורת 12000</div>
+          </div>
+          <div class="tip">
+            אם אין תשובה — נסו לשלוח <span style="font-family: var(--mono)">/start</span> ולוודא שהקוד סנכרון כבר נקלט בהצלחה.
+          </div>
+        </div>
+
+        <div class="card section">
+          <h3>פתרון בעיות מהיר</h3>
+          <ol>
+            <li><b>לא מוצא/ת את הבוט</b>: פתח/י את הלינק הישיר <span style="font-family: var(--mono)">https://t.me/Raz_cash_bot</span>.</li>
+            <li><b>קוד לא עובד</b>: ליצור קוד חדש ב‑Settings → Telegram Sync ולשלוח שוב.</li>
+            <li><b>נכנס/ת לחשבון הלא נכון בגוגל</b>: לצאת מחשבון Google בדפדפן או לבחור חשבון אחר בחלון ההתחברות.</li>
+          </ol>
+          <div class="warn">
+            שים/י לב: קוד הסנכרון הוא חד‑פעמי וזמני. אם הוא לא עובד — פשוט מייצרים חדש.
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>© 2026 cashBot</div>
+        <div>מומלץ לשמור כ‑PDF</div>
+      </div>
+    </div>
+  </body>
+</html>
+

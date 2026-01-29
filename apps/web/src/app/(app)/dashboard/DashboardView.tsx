@@ -267,7 +267,7 @@ export function DashboardView(props: {
               index="category"
               valueFormatter={money}
               colors={donutCategoryColors}
-              className="h-56"
+              className="h-52 sm:h-56"
               showLabel={false}
             />
             <div className="pointer-events-none absolute inset-0 grid place-items-center">
@@ -315,7 +315,7 @@ export function DashboardView(props: {
               index="name"
               valueFormatter={money}
               colors={["rose", "emerald"]}
-              className="h-56"
+              className="h-52 sm:h-56"
               showLabel={false}
             />
           </div>
@@ -339,7 +339,7 @@ export function DashboardView(props: {
               categories={["הוצאות", "הכנסות"]}
               colors={["rose", "emerald"]}
               valueFormatter={money}
-              className="h-80"
+              className="h-64 sm:h-80"
             />
           </div>
         </Card>
@@ -353,7 +353,7 @@ export function DashboardView(props: {
               categories={["הוצאות", "הכנסות"]}
               valueFormatter={money}
               colors={["rose", "emerald"]}
-              className="h-72"
+              className="h-60 sm:h-72"
             />
           </div>
         </Card>
@@ -514,8 +514,8 @@ export function DashboardView(props: {
               </select>
             </div>
           </div>
-          <div className="mt-2 overflow-hidden rounded-lg border bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-            <table className="w-full table-fixed text-sm text-right">
+          <div className="mt-2 overflow-x-auto rounded-lg border bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
+            <table className="min-w-[760px] w-full table-fixed text-xs text-right sm:text-sm">
               <colgroup>
                 <col className="w-[118px]" />
                 <col />
