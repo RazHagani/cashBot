@@ -76,12 +76,9 @@ export default async function HomePage({
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Link
-            href={googleHref}
-            className="inline-flex rounded-full border border-zinc-200 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-900 shadow-sm hover:bg-white dark:border-zinc-800/60 dark:bg-zinc-950/60 dark:text-zinc-100 dark:hover:bg-zinc-900/60"
-          >
-            כניסה עם Google
-          </Link>
+          <span className="hidden rounded-full border border-zinc-200 bg-white/50 px-3 py-1.5 text-xs text-zinc-600 dark:border-zinc-800/60 dark:bg-zinc-950/40 dark:text-zinc-300 md:inline-flex">
+            כניסה עם Google בלבד
+          </span>
         </div>
       </header>
 
@@ -114,10 +111,14 @@ export default async function HomePage({
           <div className="mt-7 flex flex-wrap items-center justify-end gap-3">
             <Link
               href={googleHref}
-              className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-l from-indigo-600 via-indigo-600 to-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-indigo-500/15 hover:brightness-[1.03]"
+              className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-l from-indigo-600 via-indigo-600 to-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-indigo-500/15 hover:brightness-[1.03] sm:w-auto"
             >
-              התחל עם Google
+              כניסה עם Google → לדשבורד
             </Link>
+          </div>
+
+          <div className="mt-3 text-xs leading-6 text-zinc-500 dark:text-zinc-400">
+            אין הבדל בין “הרשמה” ל“התחברות” בגוגל — אם זו פעם ראשונה שלך, המערכת תיצור משתמש אוטומטית.
           </div>
 
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -233,6 +234,58 @@ export default async function HomePage({
                 <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{s.d}</div>
               </div>
             ))}
+          </div>
+
+          {/* Friendly onboarding for non-technical users */}
+          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-zinc-200/70 bg-white/55 p-5 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-950/45">
+              <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">איך מפעילים את הבוט?</div>
+              <div className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+                נכנסים ל‑<span className="font-medium">הגדרות</span> → <span className="font-medium">Telegram Sync</span> → יוצרים
+                קוד → שולחים לבוט.
+              </div>
+              <a
+                href="https://t.me/Raz_cash_bot"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-zinc-200 bg-white/70 px-4 py-2 text-sm font-semibold text-zinc-900 shadow-sm hover:bg-white dark:border-zinc-800/60 dark:bg-zinc-950/50 dark:text-zinc-100 dark:hover:bg-zinc-900/60"
+              >
+                פתח את הבוט בטלגרם
+              </a>
+              <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">שם הבוט: @Raz_cash_bot</div>
+            </div>
+
+            <div className="rounded-2xl border border-zinc-200/70 bg-white/55 p-5 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-950/45">
+              <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">להוסיף למסך הבית (Android)</div>
+              <ol className="mt-2 list-decimal space-y-1 ps-5 text-sm text-zinc-600 dark:text-zinc-300">
+                <li>פתח/י את האתר ב‑Chrome.</li>
+                <li>לחץ/י על ⋮ (תפריט).</li>
+                <li>בחר/י “Add to Home screen”.</li>
+              </ol>
+            </div>
+
+            <div className="rounded-2xl border border-zinc-200/70 bg-white/55 p-5 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-950/45">
+              <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">להוסיף למסך הבית (iPhone)</div>
+              <ol className="mt-2 list-decimal space-y-1 ps-5 text-sm text-zinc-600 dark:text-zinc-300">
+                <li>פתח/י את האתר ב‑Safari.</li>
+                <li>לחץ/י על Share (שיתוף).</li>
+                <li>בחר/י “Add to Home Screen”.</li>
+              </ol>
+              <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">טיפ: באייפון זה עובד הכי טוב דרך Safari (לא Chrome).</div>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-zinc-200/70 bg-white/55 p-5 text-sm text-zinc-700 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-950/45 dark:text-zinc-200">
+            <div className="font-semibold text-zinc-900 dark:text-zinc-100">איך משתמשים באפליקציה (בפשטות)</div>
+            <ul className="mt-2 list-disc space-y-1 ps-5 text-zinc-600 dark:text-zinc-300">
+              <li>בדשבורד תראה/י סיכום חודש, גרפים וטרנדים.</li>
+              <li>אפשר להוסיף טרנזקציה ידנית באתר, או לשלוח הודעה קצרה לבוט בטלגרם.</li>
+              <li>הוראות קבע עוזרות לתכנן הוצאות/הכנסות קבועות מראש.</li>
+            </ul>
+            <div className="mt-3 rounded-xl border border-zinc-200/70 bg-white/70 p-3 text-xs text-zinc-600 dark:border-zinc-800/60 dark:bg-zinc-950/55 dark:text-zinc-300">
+              דוגמאות לבוט: <span className="font-medium">“פיצה 20”</span>, <span className="font-medium">“אובר 35”</span>,{" "}
+              <span className="font-medium">“משכורת 12000”</span>
+            </div>
           </div>
         </div>
       </section>
