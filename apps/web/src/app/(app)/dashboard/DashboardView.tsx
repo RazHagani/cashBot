@@ -332,29 +332,33 @@ export function DashboardView(props: {
         </Card>
         <Card className="rounded-2xl md:col-span-3 dark:border-zinc-800/60 dark:bg-zinc-950/60">
           <div className="text-sm text-zinc-600 dark:text-zinc-300">הכנסות מול הוצאות — לפי חודשים</div>
-          <div className="mt-4 rounded-xl border border-zinc-200/70 bg-white/60 p-2 text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-900/30 dark:text-zinc-100">
-            <BarChart
-              data={monthChart}
-              index="חודש"
-              categories={["הוצאות", "הכנסות"]}
-              colors={["rose", "emerald"]}
-              valueFormatter={money}
-              className="h-64 sm:h-80"
-            />
+          <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200/70 bg-white/60 text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-900/30 dark:text-zinc-100">
+            <div className="min-w-[720px] p-2 sm:min-w-0">
+              <BarChart
+                data={monthChart}
+                index="חודש"
+                categories={["הוצאות", "הכנסות"]}
+                colors={["rose", "emerald"]}
+                valueFormatter={money}
+                className="h-64 sm:h-80"
+              />
+            </div>
           </div>
         </Card>
 
         <Card className="rounded-2xl md:col-span-3 dark:border-zinc-800/60 dark:bg-zinc-950/60">
           <div className="text-sm text-zinc-600 dark:text-zinc-300">טרנד יומי</div>
-          <div className="mt-4 rounded-xl border border-zinc-200/70 bg-white/60 p-2 text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-900/30 dark:text-zinc-100">
-            <AreaChart
-              data={dayChart}
-              index="date"
-              categories={["הוצאות", "הכנסות"]}
-              valueFormatter={money}
-              colors={["rose", "emerald"]}
-              className="h-60 sm:h-72"
-            />
+          <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200/70 bg-white/60 text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-900/30 dark:text-zinc-100">
+            <div className="min-w-[900px] p-2 sm:min-w-0">
+              <AreaChart
+                data={dayChart}
+                index="date"
+                categories={["הוצאות", "הכנסות"]}
+                valueFormatter={money}
+                colors={["rose", "emerald"]}
+                className="h-60 sm:h-72"
+              />
+            </div>
           </div>
         </Card>
         </div>

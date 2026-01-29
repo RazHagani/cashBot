@@ -122,10 +122,10 @@ export default async function HomePage({
           </div>
 
           {/* Simple onboarding (mobile-first) */}
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-2xl border border-zinc-200/70 bg-white/55 p-4 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-950/45">
               <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">01</div>
-              <div className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">נכנסים</div>
+              <div className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">כניסה עם Google</div>
               <div className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
                 לוחצים <span className="font-medium">“כניסה עם Google”</span> → בוחרים חשבון → מגיעים לדשבורד.
               </div>
@@ -133,21 +133,20 @@ export default async function HomePage({
 
             <div className="rounded-2xl border border-zinc-200/70 bg-white/55 p-4 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-950/45">
               <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">02</div>
-              <div className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">מוסיפים למסך הבית</div>
+              <div className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">יצירת קוד</div>
               <div className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-                <span className="font-medium">Android (Chrome):</span> תפריט ⋮ → Add to Home screen
-                <br />
-                <span className="font-medium">iPhone (Safari):</span> Share → Add to Home Screen
+                בדשבורד נכנסים ל‑<span className="font-medium">הגדרות</span> →{" "}
+                <span className="font-medium">Telegram Sync</span> → לוחצים{" "}
+                <span className="font-medium">Create/Generate Code</span>.
               </div>
-              <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">טיפ: באייפון הכי טוב דרך Safari.</div>
+              <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">הקוד חד‑פעמי וזמני — אם לא עובד, פשוט מייצרים חדש.</div>
             </div>
 
             <div className="rounded-2xl border border-zinc-200/70 bg-white/55 p-4 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-950/45">
               <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">03</div>
-              <div className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">מחברים את הבוט</div>
+              <div className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">כניסה לבוט והכנסת הקוד</div>
               <div className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-                בדשבורד: <span className="font-medium">הגדרות</span> → <span className="font-medium">Telegram Sync</span> → יוצרים קוד
-                → שולחים לבוט.
+                פותחים את הבוט בטלגרם, לוחצים <span className="font-medium">Start</span> ושולחים לו את הקוד.
               </div>
               <a
                 href="https://t.me/Raz_cash_bot"
@@ -157,6 +156,17 @@ export default async function HomePage({
               >
                 פתח את הבוט בטלגרם (@Raz_cash_bot)
               </a>
+            </div>
+
+            <div className="rounded-2xl border border-zinc-200/70 bg-white/55 p-4 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-950/45">
+              <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">04</div>
+              <div className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">הוספה למסך הבית</div>
+              <div className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+                <span className="font-medium">Android (Chrome):</span> תפריט ⋮ → Add to Home screen
+                <br />
+                <span className="font-medium">iPhone (Safari):</span> Share → Add to Home Screen
+              </div>
+              <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">טיפ: באייפון הכי טוב דרך Safari.</div>
             </div>
           </div>
 
