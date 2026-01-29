@@ -515,21 +515,29 @@ export function DashboardView(props: {
             </div>
           </div>
           <div className="mt-2 overflow-hidden rounded-lg border bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-            <table className="w-full text-sm">
+            <table className="w-full table-fixed text-sm text-right">
+              <colgroup>
+                <col className="w-[118px]" />
+                <col />
+                <col className="w-[140px]" />
+                <col className="w-[110px]" />
+                <col className="w-[120px]" />
+                <col className="w-[150px]" />
+              </colgroup>
               <thead className="bg-zinc-50 text-right text-zinc-600 dark:bg-zinc-900/50 dark:text-zinc-300">
                 <tr>
-                  <th className="px-3 py-2">תאריך</th>
+                  <th className="px-3 py-2 whitespace-nowrap">תאריך</th>
                   <th className="px-3 py-2">תיאור</th>
-                  <th className="px-3 py-2">קטגוריה</th>
-                  <th className="px-3 py-2">סוג</th>
-                  <th className="px-3 py-2 text-left">סכום</th>
-                  <th className="px-3 py-2 text-left">פעולות</th>
+                  <th className="px-3 py-2 whitespace-nowrap">קטגוריה</th>
+                  <th className="px-3 py-2 whitespace-nowrap">סוג</th>
+                  <th className="px-3 py-2 whitespace-nowrap text-left">סכום</th>
+                  <th className="px-3 py-2 whitespace-nowrap text-left">פעולות</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((t) => (
                   <tr key={t.id} className="border-t dark:border-zinc-800/60">
-                    <td className="px-3 py-2">{new Date(t.created_at).toLocaleDateString()}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">{new Date(t.created_at).toLocaleDateString()}</td>
                     <td className="px-3 py-2">{t.description}</td>
                     <td className="px-3 py-2">{catLabel(t.category)}</td>
                     <td className="px-3 py-2">

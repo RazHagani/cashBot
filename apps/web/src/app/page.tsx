@@ -78,15 +78,9 @@ export default async function HomePage({
           <ThemeToggle />
           <Link
             href={googleHref}
-            className="hidden rounded-full border border-zinc-200 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-900 shadow-sm hover:bg-white dark:border-zinc-800/60 dark:bg-zinc-950/60 dark:text-zinc-100 dark:hover:bg-zinc-900/60 md:inline-flex"
+            className="inline-flex rounded-full border border-zinc-200 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-900 shadow-sm hover:bg-white dark:border-zinc-800/60 dark:bg-zinc-950/60 dark:text-zinc-100 dark:hover:bg-zinc-900/60"
           >
             כניסה עם Google
-          </Link>
-          <Link
-            href={googleHref}
-            className="inline-flex rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-zinc-900/10 hover:bg-black dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
-          >
-            המשך עם Google
           </Link>
         </div>
       </header>
@@ -123,18 +117,6 @@ export default async function HomePage({
               className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-l from-indigo-600 via-indigo-600 to-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-indigo-500/15 hover:brightness-[1.03]"
             >
               התחל עם Google
-            </Link>
-            <Link
-              href={googleHref}
-              className="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white/70 px-5 py-3 text-sm font-semibold text-zinc-900 shadow-sm hover:bg-white dark:border-zinc-800/60 dark:bg-zinc-950/60 dark:text-zinc-100 dark:hover:bg-zinc-900/60 md:hidden"
-            >
-              כניסה עם Google
-            </Link>
-            <Link
-              href={googleHref}
-              className="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white/70 px-5 py-3 text-sm font-semibold text-zinc-900 shadow-sm hover:bg-white dark:border-zinc-800/60 dark:bg-zinc-950/60 dark:text-zinc-100 dark:hover:bg-zinc-900/60"
-            >
-              כבר יש לי משתמש
             </Link>
           </div>
 
@@ -234,12 +216,6 @@ export default async function HomePage({
               <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">איך זה עובד</div>
               <div className="mt-1 text-xl font-semibold text-zinc-900 dark:text-zinc-100">3 צעדים ואתה בפנים</div>
             </div>
-            <Link
-              href="/login"
-              className="hidden rounded-2xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 md:inline-flex"
-            >
-              התחל עם Google
-            </Link>
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -264,11 +240,6 @@ export default async function HomePage({
       <footer className="relative mx-auto max-w-6xl px-4 pb-10 md:px-6">
         <div className="flex flex-col items-center justify-between gap-3 border-t border-zinc-200/60 pt-6 text-sm text-zinc-600 dark:border-zinc-800/60 dark:text-zinc-300 md:flex-row">
           <div>© {new Date().getFullYear()} cashBot</div>
-          <div className="flex items-center gap-3">
-            <Link href={googleHref} className="hover:underline">
-              כניסה עם Google
-            </Link>
-          </div>
         </div>
       </footer>
     </main>
