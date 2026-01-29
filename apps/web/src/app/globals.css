@@ -34,6 +34,35 @@ body::before {
   mask-image: radial-gradient(circle at 50% 0%, rgba(0, 0, 0, 0.6), transparent 70%);
 }
 
+/* Tremor/Recharts dark-mode readability fixes (axis labels default to black) */
+.dark .recharts-cartesian-axis-tick-value,
+.dark .recharts-text {
+  fill: rgba(228, 228, 231, 0.95) !important; /* zinc-200-ish */
+}
+
+.dark .recharts-cartesian-axis line,
+.dark .recharts-cartesian-axis-tick line {
+  stroke: rgba(161, 161, 170, 0.45) !important; /* zinc-400-ish */
+}
+
+.dark .recharts-cartesian-grid line,
+.dark .recharts-cartesian-grid-horizontal line,
+.dark .recharts-cartesian-grid-vertical line {
+  stroke: rgba(113, 113, 122, 0.35) !important; /* zinc-500-ish */
+}
+
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: rgba(9, 9, 11, 0.85) !important;
+  border: 1px solid rgba(63, 63, 70, 0.8) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+  color: rgba(244, 244, 245, 0.95) !important;
+}
+
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-label,
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item {
+  color: rgba(244, 244, 245, 0.95) !important;
+}
+
 /* Make inputs feel premium */
 input,
 select,

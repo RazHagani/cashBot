@@ -9,7 +9,10 @@ const loginSchema = z.object({
   password: z.string().min(6)
 });
 
-export async function loginAction(formData: FormData) {
+export async function loginAction(prevStateOrFormData: unknown, maybeFormData?: FormData) {
+  const formData = prevStateOrFormData instanceof FormData ? prevStateOrFormData : maybeFormData;
+  if (!formData) return { ok: false as const, message: "אימייל/סיסמה לא תקינים." };
+
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password")

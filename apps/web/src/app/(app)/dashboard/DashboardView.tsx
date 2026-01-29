@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, DonutChart, AreaChart } from "@tremor/react";
+import { Card, DonutChart, AreaChart, BarChart } from "@tremor/react";
 import { CATEGORIES, type TransactionType } from "@/lib/finance/types";
 import { createTransactionAction, deleteTransactionAction, updateTransactionAction } from "./actions";
 import { useMemo, useState } from "react";
@@ -30,7 +30,8 @@ const CATEGORY_LABELS_HE: Record<string, string> = {
   Shopping: "קניות",
   Health: "בריאות",
   Salary: "משכורת",
-  Other: "אחר"
+  Other: "אחר",
+  Recurring: "הוראות קבע"
 };
 
 const CATEGORY_STYLE: Record<
@@ -44,13 +45,15 @@ const CATEGORY_STYLE: Record<
   Shopping: { tremor: "violet", dot: "bg-violet-500", bar: "bg-violet-500" },
   Health: { tremor: "lime", dot: "bg-lime-500", bar: "bg-lime-500" },
   Salary: { tremor: "emerald", dot: "bg-emerald-500", bar: "bg-emerald-500" },
-  Other: { tremor: "slate", dot: "bg-slate-500", bar: "bg-slate-500" }
+  Other: { tremor: "slate", dot: "bg-slate-500", bar: "bg-slate-500" },
+  Recurring: { tremor: "rose", dot: "bg-rose-500", bar: "bg-rose-500" }
 };
 
 export function DashboardView(props: {
   monthLabel: string;
   summary: { income: number; expenses: number };
   plannedRecurring: { expenses: number; income: number };
+  salaryPlannedIncome: number;
   kpis: Kpi[];
   isTelegramLinked: boolean;
   userId: string;
@@ -67,6 +70,7 @@ export function DashboardView(props: {
   }>;
   byCategory: Array<{ category: string; total: number }>;
   byDay: Array<{ date: string; expenses: number; income: number }>;
+  byMonth: Array<{ month: string; expenses: number; income: number }>;
   items: TxRow[];
 }) {
   const currency = new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS" });
@@ -107,6 +111,23 @@ export function DashboardView(props: {
       })),
     [props.byDay]
   );
+
+  const monthChart = useMemo(() => {
+    const fmt = (ym: string) => {
+      // Use compact labels so the x-axis can show every month (no skipping).
+      // Example: 2025-02 -> "02/25" (forced LTR for readability in RTL UI)
+      const m = /^(\d{4})-(\d{2})$/.exec(ym);
+      if (!m) return ym;
+      const yy = m[1].slice(-2);
+      const mm = m[2];
+      return `\u200E${mm}/${yy}`;
+    };
+    return props.byMonth.map((m) => ({
+      חודש: fmt(m.month),
+      הוצאות: m.expenses,
+      הכנסות: m.income
+    }));
+  }, [props.byMonth]);
 
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | TransactionType>("all");
@@ -186,11 +207,27 @@ export function DashboardView(props: {
         ))}
       </div>
 
-      {(props.plannedRecurring.expenses > 0 || props.plannedRecurring.income > 0) ? (
-      <div className="rounded-2xl border border-zinc-200/70 bg-white/70 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-800/60 dark:bg-zinc-950/60 dark:text-zinc-200">
-          כולל הוראות קבע החודש:
-          <span className="mx-2 tabular-nums text-rose-700 dark:text-rose-300">הוצאות {money(props.plannedRecurring.expenses)}</span>
-          <span className="tabular-nums text-emerald-700 dark:text-emerald-300">הכנסות {money(props.plannedRecurring.income)}</span>
+      {(props.plannedRecurring.expenses > 0 ||
+        props.plannedRecurring.income > 0 ||
+        props.salaryPlannedIncome > 0) ? (
+        <div className="rounded-2xl border border-zinc-200/70 bg-white/70 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-800/70 dark:bg-zinc-950/75 dark:text-zinc-100">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="text-zinc-600 dark:text-zinc-300">קבועים בטווח הנבחר:</span>
+            <span className="tabular-nums text-rose-700 dark:text-rose-300">
+              הוראות קבע (הוצאות) {money(props.plannedRecurring.expenses)}
+            </span>
+            <span className="tabular-nums text-emerald-700 dark:text-emerald-300">
+              הוראות קבע (הכנסות) {money(props.plannedRecurring.income)}
+            </span>
+            {props.salaryPlannedIncome > 0 ? (
+              <span className="tabular-nums text-emerald-700 dark:text-emerald-300">
+                שכר חודשי (מהגדרות) {money(props.salaryPlannedIncome)}
+              </span>
+            ) : null}
+          </div>
+          <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            הערה: “הכנסות” בכרטיסים למעלה כוללות טרנזקציות + הוראות קבע. השכר מההגדרות נכנס ל“יתרה (כולל שכר)”.
+          </div>
         </div>
       ) : null}
 
@@ -202,7 +239,10 @@ export function DashboardView(props: {
             <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">פיזור נתונים</div>
           </div>
           <div className="hidden flex-wrap items-center gap-2 md:flex">
-            {CATEGORIES.map((c) => {
+            {[
+              ...CATEGORIES,
+              ...(props.plannedRecurring.expenses > 0 ? (["Recurring"] as const) : [])
+            ].map((c) => {
               const s = CATEGORY_STYLE[c] ?? CATEGORY_STYLE.Other;
               return (
                 <span
@@ -291,8 +331,22 @@ export function DashboardView(props: {
           </div>
         </Card>
         <Card className="rounded-2xl md:col-span-3 dark:border-zinc-800/60 dark:bg-zinc-950/60">
+          <div className="text-sm text-zinc-600 dark:text-zinc-300">הכנסות מול הוצאות — לפי חודשים</div>
+          <div className="mt-4 rounded-xl border border-zinc-200/70 bg-white/60 p-2 text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-900/30 dark:text-zinc-100">
+            <BarChart
+              data={monthChart}
+              index="חודש"
+              categories={["הוצאות", "הכנסות"]}
+              colors={["rose", "emerald"]}
+              valueFormatter={money}
+              className="h-80"
+            />
+          </div>
+        </Card>
+
+        <Card className="rounded-2xl md:col-span-3 dark:border-zinc-800/60 dark:bg-zinc-950/60">
           <div className="text-sm text-zinc-600 dark:text-zinc-300">טרנד יומי</div>
-          <div className="mt-4">
+          <div className="mt-4 rounded-xl border border-zinc-200/70 bg-white/60 p-2 text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-900/30 dark:text-zinc-100">
             <AreaChart
               data={dayChart}
               index="date"

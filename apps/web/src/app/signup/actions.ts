@@ -12,7 +12,10 @@ const signupSchema = z.object({
   message: "הסיסמאות לא תואמות."
 });
 
-export async function signupAction(formData: FormData) {
+export async function signupAction(prevStateOrFormData: unknown, maybeFormData?: FormData) {
+  const formData = prevStateOrFormData instanceof FormData ? prevStateOrFormData : maybeFormData;
+  if (!formData) return { ok: false as const, message: "אימייל/סיסמה לא תקינים." };
+
   const parsed = signupSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
