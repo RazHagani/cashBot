@@ -1,0 +1,14 @@
+{
+  "name": "cashbot",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace apps/web",
+    "dev:bot": "npm run dev --workspace apps/bot",
+    "build:web": "npm run build --workspace apps/web",
+    "start:bot": "npm run start --workspace apps/bot"
+  }
+}
+

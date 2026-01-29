@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+/* Better defaults */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.25);
+}
+
+/* Subtle grid texture behind the app */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(24, 24, 27, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24, 24, 27, 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at 50% 0%, rgba(0, 0, 0, 0.75), transparent 65%);
+}
+
+.dark body::before {
+  background-image: linear-gradient(rgba(244, 244, 245, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 244, 245, 0.06) 1px, transparent 1px);
+  mask-image: radial-gradient(circle at 50% 0%, rgba(0, 0, 0, 0.6), transparent 70%);
+}
+
+/* Make inputs feel premium */
+input,
+select,
+button,
+textarea {
+  outline: none;
+}
+
+
