@@ -10,8 +10,8 @@ export default async function LoginPage({
   return (
     <AuthShell
       title="התחברות"
-      subtitle="ברוך הבא. התחבר כדי להמשיך לדשבורד."
-      footer={{ text: "אין לך משתמש?", href: "/signup", cta: "הרשמה" }}
+      subtitle="התחבר באמצעות Google כדי להמשיך לדשבורד."
+      footer={{ text: "אין לך משתמש?", href: "/login", cta: "המשך עם Google" }}
     >
       <LoginForm
         checkEmail={sp.message === "check_email"}

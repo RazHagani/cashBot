@@ -1,15 +1,9 @@
 import { AuthShell } from "@/components/auth/AuthShell";
-import { SignupForm } from "./SignupForm";
+import { redirect } from "next/navigation";
 
 export default function SignupPage() {
-  return (
-    <AuthShell
-      title="הרשמה"
-      subtitle="צור משתמש כדי להתחיל לעקוב אחרי ההוצאות וההכנסות."
-      footer={{ text: "כבר יש לך משתמש?", href: "/login", cta: "התחברות" }}
-    >
-      <SignupForm />
-    </AuthShell>
-  );
+  // Google OAuth creates the user automatically when needed.
+  // Keep /signup as a friendly entry point, but route everyone to /login.
+  redirect("/login");
 }
 

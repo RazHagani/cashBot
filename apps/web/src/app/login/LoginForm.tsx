@@ -1,31 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
-import { useFormStatus } from "react-dom";
-import { loginAction } from "./actions";
-
-type FormState = { ok: true } | { ok: false; message: string } | null;
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-zinc-900/10 hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/20 disabled:opacity-60 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 dark:focus-visible:ring-white/20"
-      type="submit"
-      disabled={pending}
-    >
-      {pending ? "מתחבר..." : "התחבר"}
-    </button>
-  );
-}
-
-function inputClassName() {
-  return "w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 ps-10 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-500 focus:border-zinc-900 focus:ring-4 focus:ring-zinc-900/5 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-200 dark:focus:ring-white/10";
-}
-
 export function LoginForm(props: { oauthError?: { error?: string; details?: string }; checkEmail?: boolean }) {
-  const [state, action] = useActionState<FormState, FormData>(loginAction as any, null);
-
   return (
     <div className="flex flex-col gap-4">
       {props.checkEmail ? (
@@ -40,12 +15,6 @@ export function LoginForm(props: { oauthError?: { error?: string; details?: stri
           {props.oauthError.details ? (
             <div className="mt-1 text-xs opacity-80">{props.oauthError.details}</div>
           ) : null}
-        </div>
-      ) : null}
-
-      {state && state.ok === false ? (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-100">
-          {state.message}
         </div>
       ) : null}
 
@@ -74,64 +43,9 @@ export function LoginForm(props: { oauthError?: { error?: string; details?: stri
         התחבר עם Google
       </a>
 
-      <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-        <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800/60" />
-        או
-        <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800/60" />
+      <div className="text-xs leading-5 text-zinc-500 dark:text-zinc-400">
+        ההתחברות באפליקציה זמינה באמצעות Google בלבד. אם אין לך משתמש—לחיצה על Google תיצור משתמש אוטומטית.
       </div>
-
-      <form action={action} className="flex flex-col gap-3">
-        <label className="text-sm text-zinc-700 dark:text-zinc-200">
-          אימייל
-          <div className="relative mt-1">
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 dark:text-zinc-400"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M4 6h16v12H4z" />
-              <path d="m4 7 8 6 8-6" />
-            </svg>
-            <input
-              name="email"
-              type="email"
-              required
-              className={inputClassName()}
-              autoComplete="email"
-              placeholder="name@email.com"
-            />
-          </div>
-        </label>
-        <label className="text-sm text-zinc-700 dark:text-zinc-200">
-          סיסמה
-          <div className="relative mt-1">
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 dark:text-zinc-400"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              <path d="M6 11h12v10H6z" />
-            </svg>
-            <input
-              name="password"
-              type="password"
-              required
-              className={inputClassName()}
-              autoComplete="current-password"
-              placeholder="••••••••"
-            />
-          </div>
-        </label>
-
-        <SubmitButton />
-      </form>
     </div>
   );
 }

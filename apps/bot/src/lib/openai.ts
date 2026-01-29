@@ -2,7 +2,10 @@ import OpenAI from "openai";
 import { env } from "./env.js";
 import { ParsedResultSchema, type ParsedResult } from "./finance.js";
 
-const client = new OpenAI({ apiKey: env.OPENAI_API_KEY });
+function getClient() {
+  if (!env.OPENAI_API_KEY) return null;
+  return new OpenAI({ apiKey: env.OPENAI_API_KEY });
+}
 
 function basicParse(text: string): ParsedResult | null {
   // Extract last number as amount (supports "20", "20.5", "20,5")
@@ -92,6 +95,17 @@ const jsonSchema = {
 
 export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
   try {
+    const client = getClient();
+    if (!client) {
+      return (
+        basicParse(text) ?? {
+          ok: false,
+          reason: "openai_not_configured",
+          question: 'חסר OPENAI_API_KEY בשרת. בינתיים שלח בפורמט: "תיאור סכום" (למשל: "פיצה 20").'
+        }
+      );
+    }
+
     const res = await client.chat.completions.create({
       model: "gpt-4o-mini",
       temperature: 0,

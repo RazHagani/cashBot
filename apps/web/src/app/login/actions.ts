@@ -1,35 +1,14 @@
 "use server";
 
-import { z } from "zod";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6)
-});
-
 export async function loginAction(prevStateOrFormData: unknown, maybeFormData?: FormData) {
-  const formData = prevStateOrFormData instanceof FormData ? prevStateOrFormData : maybeFormData;
-  if (!formData) return { ok: false as const, message: "אימייל/סיסמה לא תקינים." };
-
-  const parsed = loginSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password")
-  });
-
-  if (!parsed.success) {
-    return { ok: false as const, message: "אימייל/סיסמה לא תקינים." };
-  }
-
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
-
-  if (error) {
-    return { ok: false as const, message: "התחברות נכשלה. בדוק פרטים." };
-  }
-
-  redirect("/dashboard");
+  // Password auth is intentionally disabled in this app.
+  // Keep this action as a server-side safety net if someone crafts a POST.
+  void prevStateOrFormData;
+  void maybeFormData;
+  return { ok: false as const, message: "התחברות עם אימייל/סיסמה לא זמינה. השתמש ב‑Google." };
 }
 
 export async function loginWithGoogleAction() {

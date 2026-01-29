@@ -75,10 +75,10 @@ export default async function HomePage() {
             התחברות
           </Link>
           <Link
-            href="/signup"
+            href="/login"
             className="inline-flex rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-zinc-900/10 hover:bg-black dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
           >
-            הרשמה
+            המשך עם Google
           </Link>
         </div>
       </header>
@@ -104,10 +104,10 @@ export default async function HomePage() {
 
           <div className="mt-7 flex flex-wrap items-center justify-end gap-3">
             <Link
-              href="/signup"
+              href="/login"
               className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-l from-indigo-600 via-indigo-600 to-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-indigo-500/15 hover:brightness-[1.03]"
             >
-              התחל עכשיו
+              התחל עם Google
             </Link>
             <Link
               href="/login"
@@ -220,16 +220,16 @@ export default async function HomePage() {
               <div className="mt-1 text-xl font-semibold text-zinc-900 dark:text-zinc-100">3 צעדים ואתה בפנים</div>
             </div>
             <Link
-              href="/signup"
+              href="/login"
               className="hidden rounded-2xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 md:inline-flex"
             >
-              התחל עכשיו
+              התחל עם Google
             </Link>
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
             {[
-              { n: "01", t: "נרשמים", d: "אימייל/סיסמה או Google." },
+              { n: "01", t: "נכנסים", d: "Google בלבד (יוצר משתמש אוטומטית)." },
               { n: "02", t: "מגדירים", d: "שכר חודשי + חיבור Telegram." },
               { n: "03", t: "עוקבים", d: "דשבורד, גרפים, תגים, קבלות." }
             ].map((s) => (
@@ -253,8 +253,8 @@ export default async function HomePage() {
             <Link href="/login" className="hover:underline">
               התחברות
             </Link>
-            <Link href="/signup" className="hover:underline">
-              הרשמה
+            <Link href="/login" className="hover:underline">
+              המשך עם Google
             </Link>
           </div>
         </div>

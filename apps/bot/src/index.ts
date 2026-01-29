@@ -69,5 +69,17 @@ bot.catch((err) => {
   console.error("Bot error", err);
 });
 
-bot.start();
+async function main() {
+  // Railway/always-on deploys should use long polling.
+  // If a webhook was set in the past, polling can fail—so we delete it defensively.
+  try {
+    await bot.api.deleteWebhook({ drop_pending_updates: true });
+  } catch (e) {
+    console.warn("deleteWebhook failed (continuing)", e);
+  }
+
+  bot.start();
+}
+
+main();
 

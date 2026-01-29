@@ -11,14 +11,15 @@ dotenv.config();
 
 const envSchema = z.object({
   TELEGRAM_BOT_TOKEN: z.string().min(1),
-  OPENAI_API_KEY: z.string().min(1),
+  // Optional: bot can fall back to basic parsing if missing/quota issues.
+  OPENAI_API_KEY: z.string().min(1).optional(),
   SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1)
 });
 
 export const env = envSchema.parse({
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN?.trim(),
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY?.trim(),
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY?.trim() || undefined,
   SUPABASE_URL: process.env.SUPABASE_URL?.trim(),
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
 });
