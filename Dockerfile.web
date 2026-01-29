@@ -1,0 +1,44 @@
+FROM node:22-alpine AS build
+
+WORKDIR /app
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Next.js reads NEXT_PUBLIC_* at build time too (your env validation runs during build).
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+# Install deps (including dev deps) for build
+COPY package.json package-lock.json ./
+COPY apps/web/package.json ./apps/web/package.json
+COPY apps/bot/package.json ./apps/bot/package.json
+
+RUN npm ci
+
+COPY apps/web ./apps/web
+
+# Some projects don't have a public/ folder; ensure it exists so COPY won't fail.
+RUN mkdir -p apps/web/public
+RUN npm run build --workspace apps/web
+
+FROM node:22-alpine AS runtime
+
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+COPY package.json package-lock.json ./
+COPY apps/web/package.json ./apps/web/package.json
+COPY apps/bot/package.json ./apps/bot/package.json
+
+RUN npm ci --omit=dev
+
+COPY --from=build /app/apps/web/.next ./apps/web/.next
+COPY --from=build /app/apps/web/public ./apps/web/public
+
+EXPOSE 3000
+
+CMD ["npm", "run", "start", "--workspace", "apps/web", "--", "-H", "0.0.0.0", "-p", "3000"]
+

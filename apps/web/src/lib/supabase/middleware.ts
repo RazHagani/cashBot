@@ -15,7 +15,7 @@ export async function updateSession(request: NextRequest) {
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
         // In Next.js middleware, the request cookies are immutable.
         // We only set cookies on the response.
         cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));

@@ -431,7 +431,12 @@ export function DashboardView(props: {
           </div>
         </div>
 
-        <form action={createTransactionAction} className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-5">
+        <form
+          action={async (formData) => {
+            await createTransactionAction(formData);
+          }}
+          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-5"
+        >
           <input
             name="description"
             placeholder="תיאור"

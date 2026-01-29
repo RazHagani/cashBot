@@ -1,8 +1,8 @@
 import { Bot } from "grammy";
-import { env } from "./lib/env";
-import { claimTelegramCodeAndLinkChat, getUserIdByChatId } from "./lib/linking";
-import { parseFinanceMessage } from "./lib/openai";
-import { supabaseAdmin } from "./lib/supabase";
+import { env } from "./lib/env.js";
+import { claimTelegramCodeAndLinkChat, getUserIdByChatId } from "./lib/linking.js";
+import { parseFinanceMessage } from "./lib/openai.js";
+import { supabaseAdmin } from "./lib/supabase.js";
 
 const bot = new Bot(env.TELEGRAM_BOT_TOKEN);
 

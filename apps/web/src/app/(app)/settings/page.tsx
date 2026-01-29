@@ -33,7 +33,13 @@ export default async function SettingsPage() {
             משמש לחישוב יתרה (שכר + הכנסות - הוצאות).
           </p>
 
-          <form action={updateSalaryAction} className="mt-4 flex items-end gap-3">
+          <form
+            action={async (formData) => {
+              "use server";
+              await updateSalaryAction(formData);
+            }}
+            className="mt-4 flex items-end gap-3"
+          >
             <label className="flex flex-1 flex-col gap-1 text-sm">
               סכום
               <input

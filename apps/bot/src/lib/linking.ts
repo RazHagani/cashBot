@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { supabaseAdmin } from "./supabase";
+import { supabaseAdmin } from "./supabase.js";
 
 function hashCode(code: string) {
   return crypto.createHash("sha256").update(code.trim()).digest("hex");

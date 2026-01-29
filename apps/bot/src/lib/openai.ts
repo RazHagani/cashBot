@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-import { env } from "./env";
-import { ParsedResultSchema, type ParsedResult } from "./finance";
+import { env } from "./env.js";
+import { ParsedResultSchema, type ParsedResult } from "./finance.js";
 
 const client = new OpenAI({ apiKey: env.OPENAI_API_KEY });
 

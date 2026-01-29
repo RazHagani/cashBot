@@ -45,6 +45,22 @@ npm run dev:web
 npm run dev:bot
 ```
 
+## Run with Docker (Web + Bot)
+
+1) Create a root env file:
+
+- Copy `.env.docker.example` → `.env`
+- Fill the values (Supabase + Telegram + OpenAI)
+
+2) Build + run:
+
+```bash
+docker compose up --build
+```
+
+- Web will be available at `http://localhost:3000`
+- Bot will start polling immediately (make sure `TELEGRAM_BOT_TOKEN` is correct)
+
 ## Deployment (recommended)
 
 ### Web (Vercel)

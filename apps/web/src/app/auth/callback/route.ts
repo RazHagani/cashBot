@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookies) {
+      setAll(cookies: Array<{ name: string; value: string; options?: any }>) {
         cookiesToSet.push(...cookies);
       }
     }
