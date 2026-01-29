@@ -37,7 +37,6 @@ function Icon(props: { name: "spark" | "chat" | "repeat" | "chart" }) {
   );
 }
 
-export default async function HomePage() {
 export default async function HomePage({
   searchParams
 }: {
