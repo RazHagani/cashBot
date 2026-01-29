@@ -1,5 +1,6 @@
 import { AuthShell } from "@/components/auth/AuthShell";
 import { LoginForm } from "./LoginForm";
+import { redirect } from "next/navigation";
 
 export default async function LoginPage({
   searchParams
@@ -7,17 +8,11 @@ export default async function LoginPage({
   searchParams?: Promise<{ error?: string; next?: string; message?: string; details?: string }> | undefined;
 }) {
   const sp = (await searchParams) ?? {};
-  return (
-    <AuthShell
-      title="התחברות"
-      subtitle="התחבר באמצעות Google כדי להמשיך לדשבורד."
-      footer={{ text: "אין לך משתמש?", href: "/login", cta: "המשך עם Google" }}
-    >
-      <LoginForm
-        checkEmail={sp.message === "check_email"}
-        oauthError={sp.error ? { error: sp.error, details: sp.details } : undefined}
-      />
-    </AuthShell>
-  );
+  const params = new URLSearchParams();
+  if (sp.next) params.set("next", sp.next);
+  if (sp.error) params.set("error", sp.error);
+  if (sp.details) params.set("details", sp.details);
+  if (sp.message) params.set("message", sp.message);
+  redirect(params.toString() ? `/?${params.toString()}` : "/");
 }
 

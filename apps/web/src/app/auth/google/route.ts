@@ -5,6 +5,7 @@ import { env } from "@/lib/supabase/env";
 
 export async function GET(request: NextRequest) {
   const origin = request.nextUrl.origin;
+  const next = request.nextUrl.searchParams.get("next") ?? "/dashboard";
 
   // Capture cookies set by Supabase SSR client, then apply to final response.
   const cookiesToSet: Array<{ name: string; value: string; options?: any }> = [];
@@ -23,12 +24,12 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/auth/callback`
+      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`
     }
   });
 
   if (error || !data.url) {
-    const res = NextResponse.redirect(new URL("/login?error=oauth_start_failed", origin), 302);
+    const res = NextResponse.redirect(new URL("/?error=oauth_start_failed", origin), 302);
     cookiesToSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
     return res;
   }

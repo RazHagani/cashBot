@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const next = request.nextUrl.searchParams.get("next") ?? "/dashboard";
 
   if (!code) {
-    return NextResponse.redirect(new URL("/login?error=missing_code", origin));
+    return NextResponse.redirect(new URL("/?error=missing_code", origin));
   }
 
   const cookiesToSet: Array<{ name: string; value: string; options?: any }> = [];
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     const res = NextResponse.redirect(
-      new URL(`/login?error=oauth_failed&details=${encodeURIComponent(error.message)}`, origin)
+      new URL(`/?error=oauth_failed&details=${encodeURIComponent(error.message)}`, origin)
     );
     cookiesToSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
     return res;

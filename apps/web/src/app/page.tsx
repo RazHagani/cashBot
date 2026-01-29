@@ -38,12 +38,21 @@ function Icon(props: { name: "spark" | "chat" | "repeat" | "chart" }) {
 }
 
 export default async function HomePage() {
+export default async function HomePage({
+  searchParams
+}: {
+  searchParams?: Promise<{ next?: string; error?: string; details?: string; message?: string }> | undefined;
+}) {
   // If already logged in, go straight to the app.
   const supabase = await createSupabaseServerClient();
   const {
     data: { user }
   } = await supabase.auth.getUser();
   if (user) redirect("/dashboard");
+
+  const sp = (await searchParams) ?? {};
+  const next = sp.next ?? "/dashboard";
+  const googleHref = `/auth/google?next=${encodeURIComponent(next)}`;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(1200px_700px_at_50%_-10%,rgba(99,102,241,0.22),transparent_60%),radial-gradient(900px_600px_at_5%_5%,rgba(16,185,129,0.18),transparent_55%),radial-gradient(900px_600px_at_95%_5%,rgba(244,63,94,0.18),transparent_55%),linear-gradient(180deg,rgba(244,244,245,0.92),rgba(244,244,245,0.78))] text-zinc-900 dark:bg-[radial-gradient(1200px_700px_at_50%_-10%,rgba(99,102,241,0.20),transparent_60%),radial-gradient(900px_600px_at_5%_5%,rgba(16,185,129,0.16),transparent_55%),radial-gradient(900px_600px_at_95%_5%,rgba(244,63,94,0.16),transparent_55%),linear-gradient(180deg,rgba(9,9,11,1),rgba(9,9,11,0.92))] dark:text-zinc-100">
@@ -69,13 +78,13 @@ export default async function HomePage() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <Link
-            href="/login"
+            href={googleHref}
             className="hidden rounded-full border border-zinc-200 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-900 shadow-sm hover:bg-white dark:border-zinc-800/60 dark:bg-zinc-950/60 dark:text-zinc-100 dark:hover:bg-zinc-900/60 md:inline-flex"
           >
-            התחברות
+            כניסה עם Google
           </Link>
           <Link
-            href="/login"
+            href={googleHref}
             className="inline-flex rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-zinc-900/10 hover:bg-black dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
           >
             המשך עם Google
@@ -86,6 +95,13 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 pb-14 pt-6 md:grid-cols-2 md:px-6 md:pb-20 md:pt-12">
         <div className="text-right">
+          {sp.error ? (
+            <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900 shadow-sm dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-100">
+              שגיאה בהתחברות: {sp.error}
+              {sp.details ? <div className="mt-1 text-xs opacity-80">{sp.details}</div> : null}
+            </div>
+          ) : null}
+
           <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/70 px-3 py-1 text-xs text-zinc-700 shadow-sm dark:border-zinc-800/60 dark:bg-zinc-950/60 dark:text-zinc-200">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
             דשבורד חכם · Telegram · פרטיות מלאה
@@ -104,19 +120,19 @@ export default async function HomePage() {
 
           <div className="mt-7 flex flex-wrap items-center justify-end gap-3">
             <Link
-              href="/login"
+              href={googleHref}
               className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-l from-indigo-600 via-indigo-600 to-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-indigo-500/15 hover:brightness-[1.03]"
             >
               התחל עם Google
             </Link>
             <Link
-              href="/login"
+              href={googleHref}
               className="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white/70 px-5 py-3 text-sm font-semibold text-zinc-900 shadow-sm hover:bg-white dark:border-zinc-800/60 dark:bg-zinc-950/60 dark:text-zinc-100 dark:hover:bg-zinc-900/60 md:hidden"
             >
-              התחברות
+              כניסה עם Google
             </Link>
             <Link
-              href="/login"
+              href={googleHref}
               className="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white/70 px-5 py-3 text-sm font-semibold text-zinc-900 shadow-sm hover:bg-white dark:border-zinc-800/60 dark:bg-zinc-950/60 dark:text-zinc-100 dark:hover:bg-zinc-900/60"
             >
               כבר יש לי משתמש
@@ -250,11 +266,8 @@ export default async function HomePage() {
         <div className="flex flex-col items-center justify-between gap-3 border-t border-zinc-200/60 pt-6 text-sm text-zinc-600 dark:border-zinc-800/60 dark:text-zinc-300 md:flex-row">
           <div>© {new Date().getFullYear()} cashBot</div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="hover:underline">
-              התחברות
-            </Link>
-            <Link href="/login" className="hover:underline">
-              המשך עם Google
+            <Link href={googleHref} className="hover:underline">
+              כניסה עם Google
             </Link>
           </div>
         </div>
