@@ -1,0 +1,9 @@
+FROM grafana/alloy:latest
+
+COPY observability/alloy/config.alloy /etc/alloy/config.alloy
+
+# Railway provides PORT; Alloy's HTTP server will listen on it.
+EXPOSE 12345
+
+CMD ["sh", "-c", "alloy run --server.http.listen-addr=0.0.0.0:${PORT:-12345} /etc/alloy/config.alloy"]
+

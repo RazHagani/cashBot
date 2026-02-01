@@ -1,0 +1,36 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+// Push metrics to Grafana Cloud (Hosted Prometheus) via remote_write.
+prometheus.remote_write "metrics_hosted_prometheus" {
+  endpoint {
+    name = "hosted-prometheus"
+    url  = env("GRAFANA_PROM_REMOTE_WRITE_URL")
+
+    basic_auth {
+      username = env("GRAFANA_PROM_USERNAME")
+      password = env("GRAFANA_PROM_PASSWORD")
+    }
+  }
+}
+
+// Scrape cashBot bot metrics and forward to remote_write.
+prometheus.scrape "cashbot_bot" {
+  targets = [
+    {
+      __address__      = env("BOT_METRICS_TARGET") // example: bot.railway.internal:8080
+      __scheme__       = env("BOT_METRICS_SCHEME") // http | https
+      __metrics_path__ = env("BOT_METRICS_PATH") // /metrics
+    },
+  ]
+
+  scrape_interval = "15s"
+
+  // If your bot requires Authorization: Bearer <token>
+  bearer_token = env("BOT_METRICS_TOKEN")
+
+  forward_to = [prometheus.remote_write.metrics_hosted_prometheus.receiver]
+}
+
