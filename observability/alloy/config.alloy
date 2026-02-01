@@ -18,15 +18,8 @@ prometheus.remote_write "metrics_hosted_prometheus" {
 
 // Scrape cashBot bot metrics and forward to remote_write.
 prometheus.scrape "cashbot_bot" {
-  // Static target (Prometheus-style static_configs).
-  targets = [
-    {
-      targets = [sys.env("BOT_METRICS_TARGET")],
-      labels = {
-        job = "cashbot-bot",
-      },
-    },
-  ]
+  // Static target: one address "host:port"
+  targets = [{ __address__ = sys.env("BOT_METRICS_TARGET") }]
 
   scrape_interval = "15s"
   scheme          = sys.env("BOT_METRICS_SCHEME")
