@@ -1,0 +1,10 @@
+FROM prom/prometheus:latest
+
+COPY observability/prometheus/prometheus.yml.template /etc/prometheus/prometheus.yml.template
+COPY observability/prometheus/entrypoint.sh /entrypoint.sh
+
+USER root
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+

@@ -1,10 +1,108 @@
 import { Bot } from "grammy";
+import http from "node:http";
+import * as prom from "prom-client";
 import { env } from "./lib/env.js";
 import { claimTelegramCodeAndLinkChat, getUserIdByChatId } from "./lib/linking.js";
 import { parseFinanceMessage } from "./lib/openai.js";
 import { supabaseAdmin } from "./lib/supabase.js";
 
 const bot = new Bot(env.TELEGRAM_BOT_TOKEN);
+
+// -----------------------------
+// Metrics (Prometheus)
+// -----------------------------
+const METRICS_TOKEN = process.env.METRICS_TOKEN?.trim();
+const registry = new prom.Registry();
+prom.collectDefaultMetrics({ register: registry });
+
+const messagesTotal = new prom.Counter({
+  name: "cashbot_telegram_messages_total",
+  help: "Total Telegram text messages received",
+  registers: [registry]
+});
+
+const linkAttemptsTotal = new prom.Counter({
+  name: "cashbot_link_attempts_total",
+  help: "Total Telegram sync code link attempts",
+  registers: [registry]
+});
+
+const transactionsInsertTotal = new prom.Counter({
+  name: "cashbot_transactions_insert_total",
+  help: "Total transactions inserted into DB",
+  registers: [registry]
+});
+
+const transactionsInsertErrorsTotal = new prom.Counter({
+  name: "cashbot_transactions_insert_errors_total",
+  help: "Total transaction insert errors",
+  registers: [registry]
+});
+
+const parseDurationSeconds = new prom.Histogram({
+  name: "cashbot_parse_duration_seconds",
+  help: "Time spent parsing messages",
+  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
+  registers: [registry]
+});
+
+const dbInsertDurationSeconds = new prom.Histogram({
+  name: "cashbot_db_insert_duration_seconds",
+  help: "Time spent inserting transactions to Supabase",
+  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
+  registers: [registry]
+});
+
+function startMetricsServer() {
+  const port = Number(process.env.PORT ?? 3000);
+
+  const server = http.createServer(async (req, res) => {
+    try {
+      const url = (req.url ?? "/").split("?")[0];
+
+      if (url === "/healthz") {
+        res.statusCode = 200;
+        res.setHeader("content-type", "text/plain; charset=utf-8");
+        res.end("ok");
+        return;
+      }
+
+      if (url === "/metrics") {
+        // Optional protection: if METRICS_TOKEN is set, require Bearer token.
+        if (METRICS_TOKEN) {
+          const auth = String(req.headers["authorization"] ?? "");
+          const expected = `Bearer ${METRICS_TOKEN}`;
+          if (auth !== expected) {
+            res.statusCode = 401;
+            res.setHeader("content-type", "text/plain; charset=utf-8");
+            res.end("unauthorized");
+            return;
+          }
+        }
+
+        res.statusCode = 200;
+        res.setHeader("content-type", registry.contentType);
+        res.end(await registry.metrics());
+        return;
+      }
+
+      res.statusCode = 404;
+      res.setHeader("content-type", "text/plain; charset=utf-8");
+      res.end("not found");
+    } catch (e) {
+      res.statusCode = 500;
+      res.setHeader("content-type", "text/plain; charset=utf-8");
+      res.end("error");
+    }
+  });
+
+  server.listen(port, "0.0.0.0", () => {
+    if (!METRICS_TOKEN) {
+      console.warn("METRICS_TOKEN is not set; /metrics is not protected.");
+    }
+    console.log(`metrics server listening on :${port} (endpoints: /healthz, /metrics)`);
+  });
+}
 
 bot.command("start", async (ctx) => {
   await ctx.reply(
@@ -16,6 +114,7 @@ bot.command("start", async (ctx) => {
 bot.on("message:text", async (ctx) => {
   const chatId = ctx.chat.id;
   const text = ctx.message.text.trim();
+  messagesTotal.inc();
 
   // 1) Check linkage
   const userId = await getUserIdByChatId(chatId);
@@ -27,6 +126,7 @@ bot.on("message:text", async (ctx) => {
       return;
     }
 
+    linkAttemptsTotal.inc();
     const res = await claimTelegramCodeAndLinkChat({ code: text, telegram_chat_id: chatId });
     if (!res.ok) {
       await ctx.reply(res.message);
@@ -38,7 +138,9 @@ bot.on("message:text", async (ctx) => {
   }
 
   // 2) Parse transaction
+  const parseEnd = parseDurationSeconds.startTimer();
   const parsed = await parseFinanceMessage(text);
+  parseEnd();
   if (!parsed.ok) {
     await ctx.reply(parsed.question);
     return;
@@ -47,6 +149,7 @@ bot.on("message:text", async (ctx) => {
   const { transaction } = parsed;
 
   // 3) Insert to DB
+  const insertEnd = dbInsertDurationSeconds.startTimer();
   const { error } = await supabaseAdmin.from("transactions").insert({
     user_id: userId,
     amount: transaction.amount,
@@ -54,12 +157,15 @@ bot.on("message:text", async (ctx) => {
     category: transaction.category,
     type: transaction.type
   });
+  insertEnd();
 
   if (error) {
+    transactionsInsertErrorsTotal.inc();
     await ctx.reply("שמירה נכשלה. נסה שוב בעוד רגע.");
     return;
   }
 
+  transactionsInsertTotal.inc();
   await ctx.reply(
     `נשמר: ${transaction.type} ${transaction.amount} (${transaction.category}) – ${transaction.description}`
   );
@@ -70,6 +176,8 @@ bot.catch((err) => {
 });
 
 async function main() {
+  startMetricsServer();
+
   // Railway/always-on deploys should use long polling.
   // If a webhook was set in the past, polling can fail—so we delete it defensively.
   try {
