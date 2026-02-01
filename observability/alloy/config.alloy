@@ -16,24 +16,21 @@ prometheus.remote_write "metrics_hosted_prometheus" {
   }
 }
 
-// Targets to scrape (provided via Railway env vars).
-discovery.static "cashbot_bot" {
-  targets = [
-    {
-      __address__ = sys.env("BOT_METRICS_TARGET"),
-      __scheme__  = sys.env("BOT_METRICS_SCHEME"),
-
-      // /metrics
-      __metrics_path__ = sys.env("BOT_METRICS_PATH"),
-    },
-  ]
-}
-
 // Scrape cashBot bot metrics and forward to remote_write.
 prometheus.scrape "cashbot_bot" {
-  targets = discovery.static.cashbot_bot.targets
+  // Static target (Prometheus-style static_configs).
+  targets = [
+    {
+      targets = [sys.env("BOT_METRICS_TARGET")],
+      labels = {
+        job = "cashbot-bot",
+      },
+    },
+  ]
 
   scrape_interval = "15s"
+  scheme          = sys.env("BOT_METRICS_SCHEME")
+  metrics_path    = sys.env("BOT_METRICS_PATH")
 
   // If your bot requires Authorization: Bearer <token>
   bearer_token = sys.env("BOT_METRICS_TOKEN")
