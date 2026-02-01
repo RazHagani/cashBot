@@ -20,9 +20,14 @@ prometheus.remote_write "metrics_hosted_prometheus" {
 prometheus.scrape "cashbot_bot" {
   targets = [
     {
-      __address__      = env("BOT_METRICS_TARGET") // example: bot.railway.internal:8080
-      __scheme__       = env("BOT_METRICS_SCHEME") // http | https
-      __metrics_path__ = env("BOT_METRICS_PATH") // /metrics
+      // Example: bot.railway.internal:8080
+      __address__ = env("BOT_METRICS_TARGET"),
+
+      // http | https
+      __scheme__ = env("BOT_METRICS_SCHEME"),
+
+      // /metrics
+      __metrics_path__ = env("BOT_METRICS_PATH"),
     },
   ]
 
