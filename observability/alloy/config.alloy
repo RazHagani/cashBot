@@ -33,3 +33,12 @@ prometheus.scrape "cashbot_bot" {
   forward_to = [prometheus.remote_write.metrics_hosted_prometheus.receiver]
 }
 
+// Scrape Alloy itself (debug). If this doesn't show up in Grafana, remote_write isn't working.
+prometheus.scrape "alloy_self" {
+  targets = [{ __address__ = "127.0.0.1:8080" }]
+  scrape_interval = "15s"
+  scheme          = "http"
+  metrics_path    = "/metrics"
+  forward_to      = [prometheus.remote_write.metrics_hosted_prometheus.receiver]
+}
+
