@@ -2,11 +2,10 @@
 
 import { Card, DonutChart, AreaChart, BarChart } from "@tremor/react";
 import { CATEGORIES, type TransactionType } from "@/lib/finance/types";
-import { createTransactionAction, deleteTransactionAction, updateTransactionAction } from "./actions";
+import { createTransactionAction, deleteTransactionAction } from "./actions";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { RangePicker } from "./RangePicker";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type TxRow = {
   id: string;
@@ -132,10 +131,7 @@ export function DashboardView(props: {
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | TransactionType>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [editing, setEditing] = useState<TxRow | null>(null);
-  const [receiptUploading, setReceiptUploading] = useState(false);
-  const [receiptPath, setReceiptPath] = useState<string | null>(null);
-  const [receiptError, setReceiptError] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -207,30 +203,6 @@ export function DashboardView(props: {
         ))}
       </div>
 
-      {(props.plannedRecurring.expenses > 0 ||
-        props.plannedRecurring.income > 0 ||
-        props.salaryPlannedIncome > 0) ? (
-        <div className="rounded-2xl border border-zinc-200/70 bg-white/70 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-800/70 dark:bg-zinc-950/75 dark:text-zinc-100">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="text-zinc-600 dark:text-zinc-300">קבועים בטווח הנבחר:</span>
-            <span className="tabular-nums text-rose-700 dark:text-rose-300">
-              הוראות קבע (הוצאות) {money(props.plannedRecurring.expenses)}
-            </span>
-            <span className="tabular-nums text-emerald-700 dark:text-emerald-300">
-              הוראות קבע (הכנסות) {money(props.plannedRecurring.income)}
-            </span>
-            {props.salaryPlannedIncome > 0 ? (
-              <span className="tabular-nums text-emerald-700 dark:text-emerald-300">
-                שכר חודשי (מהגדרות) {money(props.salaryPlannedIncome)}
-              </span>
-            ) : null}
-          </div>
-          <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            הערה: “הכנסות” בכרטיסים למעלה כוללות טרנזקציות + הוראות קבע. השכר מההגדרות נכנס ל“יתרה (כולל שכר)”.
-          </div>
-        </div>
-      ) : null}
-
       {/* Analytics strip */}
       <div className="rounded-3xl border border-zinc-200/70 bg-[linear-gradient(135deg,rgba(99,102,241,0.10),rgba(16,185,129,0.06),rgba(244,63,94,0.06))] p-4 dark:border-zinc-800/60 dark:bg-[linear-gradient(135deg,rgba(99,102,241,0.14),rgba(16,185,129,0.08),rgba(244,63,94,0.08))] md:p-5">
         <div className="mb-3 flex items-center justify-between">
@@ -276,7 +248,7 @@ export function DashboardView(props: {
                 <div className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{money(totalExpense)}</div>
               </div>
             </div>
-          </div>
+          </div>  
           <div className="mt-4 space-y-3">
             {categoryTable.length === 0 ? (
               <div className="rounded-xl border bg-white px-3 py-3 text-sm text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-400">אין נתונים עדיין.</div>
@@ -428,56 +400,19 @@ export function DashboardView(props: {
       <Card className="rounded-2xl dark:border-zinc-800/60 dark:bg-zinc-950/60">
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-sm text-zinc-600 dark:text-zinc-300">הוספת טרנזקציה</div>
+            <div className="text-sm text-zinc-600 dark:text-zinc-300">טרנזקציות</div>
             <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
               טיפ: כתוב בטלגרם “פיצה 20” או “משכורת 12000”
             </div>
           </div>
-        </div>
-
-        <form
-          action={async (formData) => {
-            await createTransactionAction(formData);
-          }}
-          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-5"
-        >
-          <input
-            name="description"
-            placeholder="תיאור"
-            className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-500 focus:border-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-200 md:col-span-2"
-            required
-            maxLength={200}
-          />
-          <input
-            name="amount"
-            placeholder="סכום"
-            className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-500 focus:border-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-200"
-            required
-            inputMode="decimal"
-          />
-          <select
-            name="category"
-            className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-200"
-            defaultValue="Other"
+          <button
+            type="button"
+            className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+            onClick={() => setAdding(true)}
           >
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {catLabel(c)}
-              </option>
-            ))}
-          </select>
-          <select
-            name="type"
-            className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-200"
-            defaultValue="expense"
-          >
-            <option value="expense">הוצאה</option>
-            <option value="income">הכנסה</option>
-          </select>
-          <button className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-black md:col-span-5">
-            שמור
+            הוספת הוצאה/הכנסה
           </button>
-        </form>
+        </div>
 
         <div className="mt-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -560,17 +495,6 @@ export function DashboardView(props: {
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          className="rounded-lg border bg-white px-2.5 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900/60"
-                          onClick={() => {
-                            setEditing(t);
-                            setReceiptPath(t.receipt_path ?? null);
-                            setReceiptError(null);
-                          }}
-                        >
-                          ערוך
-                        </button>
-                        <button
-                          type="button"
                           className="rounded-lg border bg-white px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-rose-300 dark:hover:bg-rose-950/30"
                           onClick={async () => {
                             if (!confirm("למחוק את הטרנזקציה?")) return;
@@ -596,20 +520,20 @@ export function DashboardView(props: {
         </div>
       </Card>
 
-      {editing ? (
+      {adding ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/30 p-4">
           <div className="w-full max-w-lg rounded-2xl border bg-white p-5 shadow-xl dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="text-sm font-semibold">עריכת טרנזקציה</div>
+                <div className="text-sm font-semibold">הוספת הוצאה/הכנסה</div>
                 <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                  עדכן פרטים, הוסף תגיות/הערה והעלה קבלה.
+                  מלא תיאור, סכום, קטגוריה וסוג — ושמור.
                 </div>
               </div>
               <button
                 type="button"
                 className="rounded-lg border bg-white px-2 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900/60"
-                onClick={() => setEditing(null)}
+                onClick={() => setAdding(false)}
               >
                 סגור
               </button>
@@ -618,54 +542,40 @@ export function DashboardView(props: {
             <form
               className="mt-4 grid grid-cols-1 gap-3"
               action={async (formData) => {
-                formData.set("id", editing.id);
-                if (receiptPath) formData.set("receipt_path", receiptPath);
-                await updateTransactionAction(formData);
-                setEditing(null);
+                await createTransactionAction(formData);
+                setAdding(false);
               }}
             >
-              <input type="hidden" name="id" value={editing.id} />
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <label className="text-sm">
                   תיאור
                   <input
                     name="description"
-                    defaultValue={editing.description}
                     className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100"
                     maxLength={200}
                     required
+                    placeholder="לדוגמה: דלק / קניות"
                   />
                 </label>
                 <label className="text-sm">
                   סכום
                   <input
                     name="amount"
-                    defaultValue={editing.amount}
                     className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100"
                     inputMode="decimal"
                     required
+                    placeholder="לדוגמה: 45"
                   />
                 </label>
               </div>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <label className="text-sm">
-                  סוג
-                  <select
-                    name="type"
-                    defaultValue={editing.type}
-                    className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100"
-                  >
-                    <option value="expense">הוצאה</option>
-                    <option value="income">הכנסה</option>
-                  </select>
-                </label>
-                <label className="text-sm">
                   קטגוריה
                   <select
                     name="category"
-                    defaultValue={editing.category}
                     className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100"
+                    defaultValue="Other"
                   >
                     {CATEGORIES.map((c) => (
                       <option key={c} value={c}>
@@ -674,87 +584,29 @@ export function DashboardView(props: {
                     ))}
                   </select>
                 </label>
-              </div>
 
-              <label className="text-sm">
-                תגיות (מופרדות בפסיקים)
-                <input
-                  name="tags"
-                  defaultValue={(editing.tags ?? []).join(", ")}
-                  className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
-                  placeholder="לדוגמה: אוכל, משפחה"
-                />
-              </label>
-
-              <label className="text-sm">
-                הערות
-                <textarea
-                  name="notes"
-                  defaultValue={editing.notes ?? ""}
-                  className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100"
-                  rows={3}
-                />
-              </label>
-
-              <div className="rounded-xl border bg-zinc-50 p-3 dark:border-zinc-800/60 dark:bg-zinc-900/30">
-                <div className="text-sm font-medium">קבלה</div>
-                <div className="mt-2 flex flex-wrap items-center gap-3">
-                  <input
-                    type="file"
-                    accept="image/*,application/pdf"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      setReceiptUploading(true);
-                      setReceiptError(null);
-                      try {
-                        const supabase = createSupabaseBrowserClient();
-                        const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
-                        const path = `${props.userId}/${crypto.randomUUID()}.${ext}`;
-                        const { error } = await supabase.storage.from("receipts").upload(path, file, {
-                          upsert: true
-                        });
-                        if (error) throw error;
-                        setReceiptPath(path);
-                      } catch (err: any) {
-                        setReceiptError(err?.message ?? "Upload failed");
-                      } finally {
-                        setReceiptUploading(false);
-                      }
-                    }}
-                  />
-
-                  {receiptUploading ? <span className="text-xs text-zinc-600 dark:text-zinc-300">מעלה...</span> : null}
-                  {receiptError ? <span className="text-xs text-rose-700">{receiptError}</span> : null}
-
-                  {receiptPath ? (
-                    <button
-                      type="button"
-                      className="rounded-lg border bg-white px-2.5 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900/60"
-                      onClick={async () => {
-                        const supabase = createSupabaseBrowserClient();
-                        const { data, error } = await supabase.storage.from("receipts").createSignedUrl(receiptPath, 60);
-                        if (error || !data?.signedUrl) return;
-                        window.open(data.signedUrl, "_blank", "noopener,noreferrer");
-                      }}
-                    >
-                      פתח קבלה
-                    </button>
-                  ) : (
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400">לא הועלתה קבלה עדיין</span>
-                  )}
-                </div>
+                <label className="text-sm">
+                  סוג
+                  <select
+                    name="type"
+                    className="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100"
+                    defaultValue="expense"
+                  >
+                    <option value="expense">הוצאה</option>
+                    <option value="income">הכנסה</option>
+                  </select>
+                </label>
               </div>
 
               <div className="mt-2 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   className="rounded-xl border bg-white px-4 py-2 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-800/60 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900/60"
-                  onClick={() => setEditing(null)}
+                  onClick={() => setAdding(false)}
                 >
                   ביטול
                 </button>
-                <button className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-black">
+                <button className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-black dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100">
                   שמור
                 </button>
               </div>
