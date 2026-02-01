@@ -3,7 +3,7 @@
 import { Card, DonutChart, AreaChart, BarChart } from "@tremor/react";
 import { CATEGORIES, type TransactionType } from "@/lib/finance/types";
 import { createTransactionAction, deleteTransactionAction } from "./actions";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { RangePicker } from "./RangePicker";
 
@@ -48,6 +48,23 @@ const CATEGORY_STYLE: Record<
   Recurring: { tremor: "rose", dot: "bg-rose-500", bar: "bg-rose-500" }
 };
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)"); // Tailwind <sm
+    const onChange = () => setIsMobile(mq.matches);
+    onChange();
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, []);
+  return isMobile;
+}
+
+function parseYmdLocal(ymd: string) {
+  // Avoid timezone shifts for YYYY-MM-DD
+  return new Date(`${ymd}T00:00:00`);
+}
+
 export function DashboardView(props: {
   monthLabel: string;
   summary: { income: number; expenses: number };
@@ -72,6 +89,8 @@ export function DashboardView(props: {
   byMonth: Array<{ month: string; expenses: number; income: number }>;
   items: TxRow[];
 }) {
+  const isMobile = useIsMobile();
+  const [mobileChart, setMobileChart] = useState<"months" | "trend">("months");
   const currency = new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS" });
   const percent = new Intl.NumberFormat("he-IL", { style: "percent", maximumFractionDigits: 0 });
   const money = (n: number) => currency.format(n);
@@ -127,6 +146,50 @@ export function DashboardView(props: {
       הכנסות: m.income
     }));
   }, [props.byMonth]);
+
+  const mobileMonthChart = useMemo(() => {
+    // Mobile: keep it readable by focusing on last 6 months.
+    return monthChart.slice(-6);
+  }, [monthChart]);
+
+  const mobileWeekChart = useMemo(() => {
+    // Mobile: weekly buckets to reduce clutter (far more readable than 30+ daily points).
+    const rows = props.byDay
+      .slice()
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((d) => ({ ...d, dateObj: parseYmdLocal(d.date) }));
+
+    const buckets: Array<{ start: Date; end: Date; expenses: number; income: number }> = [];
+    let cur: { start: Date; end: Date; expenses: number; income: number } | null = null;
+    let count = 0;
+
+    for (const r of rows) {
+      if (!cur) {
+        cur = { start: r.dateObj, end: r.dateObj, expenses: 0, income: 0 };
+        count = 0;
+      }
+      cur.end = r.dateObj;
+      cur.expenses += r.expenses;
+      cur.income += r.income;
+      count += 1;
+      if (count >= 7) {
+        buckets.push(cur);
+        cur = null;
+      }
+    }
+    if (cur) buckets.push(cur);
+
+    // Keep last ~8 weeks max
+    const last = buckets.slice(-8);
+    const fmt = (d: Date) =>
+      `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+
+    return last.map((b) => ({
+      date: `\u200E${fmt(b.start)}–${fmt(b.end)}`, // force LTR inside RTL UI
+      הוצאות: b.expenses,
+      הכנסות: b.income
+    }));
+  }, [props.byDay]);
 
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | TransactionType>("all");
@@ -304,35 +367,74 @@ export function DashboardView(props: {
         </Card>
         <Card className="rounded-2xl md:col-span-3 dark:border-zinc-800/60 dark:bg-zinc-950/60">
           <div className="text-sm text-zinc-600 dark:text-zinc-300">הכנסות מול הוצאות — לפי חודשים</div>
-          <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200/70 bg-white/60 text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-900/30 dark:text-zinc-100">
-            <div className="min-w-[720px] p-2 sm:min-w-0">
-              <BarChart
-                data={monthChart}
-                index="חודש"
-                categories={["הוצאות", "הכנסות"]}
-                colors={["rose", "emerald"]}
-                valueFormatter={money}
-                className="h-64 sm:h-80"
-              />
+          {isMobile ? (
+            <div className="mt-3 flex items-center gap-2">
+              <button
+                type="button"
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                  mobileChart === "months"
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+                    : "bg-white/70 text-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-100"
+                }`}
+                onClick={() => setMobileChart("months")}
+              >
+                חודשים
+              </button>
+              <button
+                type="button"
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                  mobileChart === "trend"
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+                    : "bg-white/70 text-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-100"
+                }`}
+                onClick={() => setMobileChart("trend")}
+              >
+                טרנד
+              </button>
             </div>
-          </div>
+          ) : null}
+
+          {!isMobile || mobileChart === "months" ? (
+            <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200/70 bg-white/60 text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-900/30 dark:text-zinc-100 sm:overflow-visible">
+              <div className="min-w-[680px] p-2 sm:min-w-0">
+                <BarChart
+                  data={isMobile ? mobileMonthChart : monthChart}
+                  index="חודש"
+                  categories={["הוצאות", "הכנסות"]}
+                  colors={["rose", "emerald"]}
+                  valueFormatter={money}
+                  className={isMobile ? "h-64" : "h-80"}
+                />
+              </div>
+              {isMobile ? (
+                <div className="px-3 pb-3 text-xs text-zinc-500 dark:text-zinc-400">אפשר לגרור ימינה/שמאלה כדי לראות בנוחות.</div>
+              ) : null}
+            </div>
+          ) : null}
         </Card>
 
-        <Card className="rounded-2xl md:col-span-3 dark:border-zinc-800/60 dark:bg-zinc-950/60">
-          <div className="text-sm text-zinc-600 dark:text-zinc-300">טרנד יומי</div>
-          <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200/70 bg-white/60 text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-900/30 dark:text-zinc-100">
-            <div className="min-w-[900px] p-2 sm:min-w-0">
-              <AreaChart
-                data={dayChart}
-                index="date"
-                categories={["הוצאות", "הכנסות"]}
-                valueFormatter={money}
-                colors={["rose", "emerald"]}
-                className="h-60 sm:h-72"
-              />
+        {!isMobile || mobileChart === "trend" ? (
+          <Card className="rounded-2xl md:col-span-3 dark:border-zinc-800/60 dark:bg-zinc-950/60">
+            <div className="text-sm text-zinc-600 dark:text-zinc-300">{isMobile ? "טרנד שבועי" : "טרנד יומי"}</div>
+            <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200/70 bg-white/60 text-zinc-900 dark:border-zinc-800/60 dark:bg-zinc-900/30 dark:text-zinc-100 sm:overflow-visible">
+              <div className="min-w-[720px] p-2 sm:min-w-0">
+                <AreaChart
+                  data={isMobile ? mobileWeekChart : dayChart}
+                  index="date"
+                  categories={["הוצאות", "הכנסות"]}
+                  valueFormatter={money}
+                  colors={["rose", "emerald"]}
+                  className={isMobile ? "h-64" : "h-72"}
+                />
+              </div>
+              {isMobile ? (
+                <div className="px-3 pb-3 text-xs text-zinc-500 dark:text-zinc-400">
+                  בטלפון אנחנו מציגים טרנד שבועי כדי שיהיה קריא יותר.
+                </div>
+              ) : null}
             </div>
-          </div>
-        </Card>
+          </Card>
+        ) : null}
         </div>
       </div>
 
