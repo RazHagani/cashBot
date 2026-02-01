@@ -1,4 +1,4 @@
-import { Bot } from "grammy";
+import { Bot, GrammyError } from "grammy";
 import http from "node:http";
 import * as prom from "prom-client";
 import { env } from "./lib/env.js";
@@ -104,6 +104,10 @@ function startMetricsServer() {
   });
 }
 
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 bot.command("start", async (ctx) => {
   await ctx.reply(
     "היי! אני cashBot.\n" +
@@ -186,7 +190,31 @@ async function main() {
     console.warn("deleteWebhook failed (continuing)", e);
   }
 
-  bot.start();
+  // Telegram allows only ONE polling instance per bot token.
+  // If another instance is running (local dev / another service), Telegram returns 409.
+  // We retry instead of crashing the whole service.
+  while (true) {
+    try {
+      await bot.start();
+      return;
+    } catch (e: any) {
+      const err = e as GrammyError;
+      const msg = String((e as any)?.message ?? "");
+      const is409 =
+        (err instanceof GrammyError && (err as any).error_code === 409) ||
+        msg.includes("409") ||
+        msg.includes("terminated by other getUpdates request");
+
+      if (is409) {
+        console.warn("Telegram 409 conflict (another bot instance running). Retrying in 5s...");
+        await sleep(5000);
+        continue;
+      }
+
+      console.error("Bot start failed", e);
+      throw e;
+    }
+  }
 }
 
 main();
