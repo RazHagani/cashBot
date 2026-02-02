@@ -45,9 +45,8 @@ export function PresencePing() {
 
     function startInterval() {
       if (timer) window.clearInterval(timer);
-      // Your definition: if no heartbeat in last 30s => not "connected now".
-      // So we send a heartbeat every 30 seconds.
-      timer = window.setInterval(() => void ping("interval"), 30_000);
+      // Heartbeat every 5 seconds (higher resolution for Grafana).
+      timer = window.setInterval(() => void ping("interval"), 5_000);
     }
 
     function onVisibilityChange() {
