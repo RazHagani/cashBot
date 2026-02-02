@@ -33,6 +33,17 @@ function cleanDescription(input: string) {
   return s || input.trim();
 }
 
+function stripLeadingNumber(s: string) {
+  // "10 כדור" -> { num: 10, rest: "כדור" }
+  const m = /^\s*(\d+(?:[.,]\d+)?)\s+(.+?)\s*$/.exec(s);
+  if (!m) return null;
+  const num = Number(m[1].replace(",", "."));
+  if (!Number.isFinite(num)) return null;
+  const rest = m[2].trim();
+  if (!rest) return null;
+  return { num, rest };
+}
+
 function basicParse(text: string): ParsedResult | null {
   // Extract last number as amount (supports "20", "20.5", "20,5")
   const m = text.match(/(-?\d+(?:[.,]\d+)?)(?!.*\d)/);
@@ -217,6 +228,29 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
         }
       };
 
+      // If model put the number into description ("10 כדור") instead of amount,
+      // and amount looks like a placeholder, extract amount from description.
+      const leading = stripLeadingNumber(cleaned.transaction.description);
+      if (leading) {
+        const modelAmount = Number(cleaned.transaction.amount);
+        const modelLooksPlaceholder = modelAmount === 0.01 || modelAmount < 0.5;
+        if (modelLooksPlaceholder && leading.num >= 1) {
+          console.warn(
+            "[openai] moved amount from description to amount (placeholder fix).",
+            JSON.stringify({ modelAmount, fixedAmount: leading.num })
+          );
+          cleaned.transaction.amount = leading.num;
+          cleaned.transaction.description = cleanDescription(leading.rest).slice(0, 200);
+        } else {
+          // If amount is already correct but description repeats the amount, strip it.
+          const close =
+            Number.isFinite(modelAmount) && Math.abs(modelAmount - leading.num) < 1e-6 && modelAmount >= 1;
+          if (close) {
+            cleaned.transaction.description = cleanDescription(leading.rest).slice(0, 200);
+          }
+        }
+      }
+
       // Safety net:
       // Sometimes the model returns a placeholder amount (e.g. 0.01) even when the message clearly contains a price.
       // If our basic parser can confidently extract a real amount (>= 1), prefer it.
@@ -241,6 +275,21 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
               description: cleanDescription(fallback.transaction.description).slice(0, 200)
             }
           };
+        }
+
+        // If model amount equals the parsed amount, but description still contains the amount,
+        // prefer the basicParse description (usually cleaner for short inputs like "כדור 10").
+        if (basicLooksReal && Math.abs(modelAmount - basicAmount) < 1e-6) {
+          const lead2 = stripLeadingNumber(cleaned.transaction.description);
+          if (lead2 && Math.abs(lead2.num - basicAmount) < 1e-6) {
+            return {
+              ...cleaned,
+              transaction: {
+                ...cleaned.transaction,
+                description: cleanDescription(fallback.transaction.description).slice(0, 200)
+              }
+            };
+          }
         }
       }
 
