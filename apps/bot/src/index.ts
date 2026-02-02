@@ -54,6 +54,9 @@ const dbInsertDurationSeconds = new prom.Histogram({
   registers: [registry]
 });
 
+let metricsServer: http.Server | null = null;
+let shuttingDown = false;
+
 function startMetricsServer() {
   const port = Number(process.env.PORT ?? 3000);
 
@@ -103,6 +106,8 @@ function startMetricsServer() {
     }
     console.log(`metrics server listening on :${port} (endpoints: /healthz, /metrics)`);
   });
+
+  metricsServer = server;
 }
 
 function sleep(ms: number) {
@@ -185,6 +190,25 @@ bot.catch((err) => {
 async function main() {
   startMetricsServer();
 
+  // Graceful shutdown so rolling deploys don't leave a polling session alive.
+  const shutdown = async (signal: string) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`[shutdown] received ${signal}; stopping bot...`);
+    try {
+      bot.stop();
+    } catch {}
+    try {
+      metricsServer?.close();
+    } catch {}
+    // Give Telegram polling a moment to release.
+    await sleep(500);
+    process.exit(0);
+  };
+
+  process.once("SIGTERM", () => void shutdown("SIGTERM"));
+  process.once("SIGINT", () => void shutdown("SIGINT"));
+
   // Railway/always-on deploys should use long polling.
   // If a webhook was set in the past, polling can fail—so we delete it defensively.
   try {
@@ -201,6 +225,7 @@ async function main() {
       await bot.start();
       return;
     } catch (e: any) {
+      if (shuttingDown) return;
       const err = e as GrammyError;
       const msg = String((e as any)?.message ?? "");
       const is409 =
