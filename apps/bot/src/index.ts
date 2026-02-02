@@ -7,6 +7,7 @@ import { parseFinanceMessage } from "./lib/openai.js";
 import { supabaseAdmin } from "./lib/supabase.js";
 
 const bot = new Bot(env.TELEGRAM_BOT_TOKEN);
+console.log(`[boot] OPENAI_API_KEY configured: ${env.OPENAI_API_KEY ? "yes" : "no"}`);
 
 // -----------------------------
 // Metrics (Prometheus)
@@ -119,6 +120,7 @@ bot.on("message:text", async (ctx) => {
   const chatId = ctx.chat.id;
   const text = ctx.message.text.trim();
   messagesTotal.inc();
+  console.log(`[bot] msg chat=${chatId} text="${text.slice(0, 120)}"${text.length > 120 ? "…" : ""}`);
 
   // 1) Check linkage
   const userId = await getUserIdByChatId(chatId);
@@ -142,6 +144,7 @@ bot.on("message:text", async (ctx) => {
   }
 
   // 2) Parse transaction
+  console.log(`[bot] parsing via ${env.OPENAI_API_KEY ? "openai" : "basic"} (user linked)`);
   const parseEnd = parseDurationSeconds.startTimer();
   const parsed = await parseFinanceMessage(text);
   parseEnd();
