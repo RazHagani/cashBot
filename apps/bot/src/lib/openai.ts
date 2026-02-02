@@ -81,17 +81,9 @@ const jsonSchema = {
       reason: { type: "string" },
       question: { type: "string" }
     },
-    required: ["ok"],
-    allOf: [
-      {
-        if: { properties: { ok: { const: true } }, required: ["ok"] },
-        then: { required: ["transaction"] }
-      },
-      {
-        if: { properties: { ok: { const: false } }, required: ["ok"] },
-        then: { required: ["reason", "question"] }
-      }
-    ]
+    // NOTE: OpenAI's json_schema doesn't allow all JSON Schema keywords.
+    // In particular, "allOf/if/then" are rejected. We validate conditionals in Zod instead.
+    required: ["ok"]
   }
 } as const;
 
