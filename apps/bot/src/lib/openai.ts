@@ -9,6 +9,30 @@ function getClient() {
 
 let warnedNoKey = false;
 
+function cleanDescription(input: string) {
+  let s = input.trim();
+  // Remove common Hebrew "purchase verbs"/fillers from the beginning.
+  // Keep it conservative to avoid over-stripping real product names.
+  s = s.replace(
+    /^(?:היום\s+)?(?:קניתי|קנינו|קנית|קנה|קנו|שילמתי|שילמנו|קניתי היום)\s+/,
+    ""
+  );
+  s = s.replace(/^(?:ב|על)\s+/, ""); // e.g., "על חצילים" -> "חצילים"
+  s = s.replace(/^[-–—:]+/, "").trim();
+
+  // Strip trailing price/currency fragments if they leaked into description.
+  // Examples: "6 חצילים ב-100", "6 חצילים ב100₪", "6 חצילים במאה שקל"
+  s = s.replace(/\s*(?:ב(?:-| )?)?\d+(?:[.,]\d+)?\s*(?:₪|ש\"?ח|שח|שקל(?:ים)?)?\s*$/i, "");
+  s = s.replace(/\s*ב(?:-| )?(?:מאה|מאתיים|אלף)\s*(?:₪|ש\"?ח|שח|שקל(?:ים)?)\s*$/i, "");
+  // If currency words appear at the end with no number (rare), strip them.
+  s = s.replace(/\s*(?:₪|ש\"?ח|שח|שקל(?:ים)?)\s*$/i, "");
+
+  // Remove leftover punctuation
+  s = s.replace(/[()]/g, "").trim();
+  s = s.replace(/\s{2,}/g, " ").trim();
+  return s || input.trim();
+}
+
 function basicParse(text: string): ParsedResult | null {
   // Extract last number as amount (supports "20", "20.5", "20,5")
   const m = text.match(/(-?\d+(?:[.,]\d+)?)(?!.*\d)/);
@@ -49,7 +73,7 @@ function basicParse(text: string): ParsedResult | null {
     ok: true,
     transaction: {
       amount,
-      description: desc.slice(0, 200),
+      description: cleanDescription(desc).slice(0, 200),
       category,
       type
     }
@@ -115,6 +139,10 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
           role: "system",
           content:
             "You parse short personal finance messages into a single transaction. " +
+            "Return a clean, short item/merchant description (2-6 words). " +
+            "Do NOT include filler verbs like 'I bought', 'paid', dates like 'today', or any price/currency words in the description. " +
+            "If the user mentions quantity/items, keep it (e.g., '6 eggplants'). " +
+            "If ok=true, transaction must be an object. If ok=false, transaction should be null. " +
             "If you cannot confidently parse, return ok=false with a short question for clarification."
         },
         {
@@ -124,7 +152,9 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
             "Examples:\n" +
             "- Lunch 50 -> expense, category Food\n" +
             "- Salary 12000 -> income, category Salary\n" +
-            "- Uber 32 -> expense, category Transport\n"
+            "- Uber 32 -> expense, category Transport\n" +
+            "- קניתי היום 6 חצילים ב-100 -> expense, description should be \"6 חצילים\" (not \"קניתי 6 חצילים\" and not include the price)\n" +
+            "- קניתי היום 6 חצילים במאה שקל -> expense, amount 100, description \"6 חצילים\"\n"
         }
       ],
       response_format: {
@@ -177,6 +207,16 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
       );
     }
 
+    // Post-clean description (Hebrew/English fillers) to keep UX consistent.
+    if (validated.data.ok) {
+      return {
+        ...validated.data,
+        transaction: {
+          ...validated.data.transaction,
+          description: cleanDescription(validated.data.transaction.description).slice(0, 200)
+        }
+      };
+    }
     return validated.data;
   } catch (e: any) {
     const msg = String(e?.message ?? "");
