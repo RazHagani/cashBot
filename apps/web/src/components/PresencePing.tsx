@@ -35,17 +35,11 @@ export function PresencePing() {
       if (!userId) return;
       const now = new Date().toISOString();
 
-      const [currentRes, eventsRes] = await Promise.all([
-        supabase
-          .from("presence_current")
-          .upsert({ user_id: userId, last_seen: now }, { onConflict: "user_id" }),
-        supabase.from("presence_events").insert({ user_id: userId, seen_at: now })
-      ]);
+      const res = await supabase.rpc("ping_presence", { seen_at: now });
 
       if (debug) {
-        if (currentRes.error) console.warn("[presence] presence_current error", currentRes.error);
-        if (eventsRes.error) console.warn("[presence] presence_events error", eventsRes.error);
-        if (!currentRes.error && !eventsRes.error) console.log("[presence] ping ok", _reason, now);
+        if (res.error) console.warn("[presence] ping_presence error", res.error);
+        else console.log("[presence] ping ok", _reason, now);
       }
     }
 
