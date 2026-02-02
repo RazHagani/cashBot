@@ -165,9 +165,10 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
 
     return validated.data;
   } catch (e: any) {
-    // Fallback if OpenAI is unavailable/quota exceeded
-    const fallback = basicParse(text);
-    if (fallback) return fallback;
+    const msg = String(e?.message ?? "");
+    const code = e?.code ?? e?.error?.code;
+    const status = e?.status ?? e?.response?.status;
+    const isQuota = status === 429 || code === "insufficient_quota" || msg.includes("exceeded your current quota");
 
     const msg = String(e?.message ?? "");
     const code = e?.code ?? e?.error?.code;
@@ -183,6 +184,10 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
         message: msg.slice(0, 200)
       })
     );
+
+    // Fallback if OpenAI is unavailable/quota exceeded
+    const fallback = basicParse(text);
+    if (fallback) return fallback;
 
     return {
       ok: false,
