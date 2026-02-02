@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -109,12 +108,12 @@ export default async function HomePage({
           </p>
 
           <div className="mt-7 flex flex-wrap items-center justify-end gap-3">
-            <Link
+            <a
               href={googleHref}
               className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-l from-indigo-600 via-indigo-600 to-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-indigo-500/15 hover:brightness-[1.03] sm:w-auto"
             >
               כניסה עם Google → לדשבורד
-            </Link>
+            </a>
           </div>
 
           <div className="mt-3 text-xs leading-6 text-zinc-500 dark:text-zinc-400">
