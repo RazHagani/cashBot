@@ -65,7 +65,9 @@ const jsonSchema = {
     properties: {
       ok: { type: "boolean" },
       transaction: {
-        type: "object",
+        // In OpenAI strict mode, all top-level properties must be required.
+        // We allow null here and enforce conditional requirements in Zod.
+        type: ["object", "null"],
         additionalProperties: false,
         properties: {
           amount: { type: "number", minimum: 0.01 },
@@ -78,12 +80,13 @@ const jsonSchema = {
         },
         required: ["amount", "description", "category", "type"]
       },
-      reason: { type: "string" },
-      question: { type: "string" }
+      reason: { type: ["string", "null"] },
+      question: { type: ["string", "null"] }
     },
     // NOTE: OpenAI's json_schema doesn't allow all JSON Schema keywords.
     // In particular, "allOf/if/then" are rejected. We validate conditionals in Zod instead.
-    required: ["ok"]
+    // OpenAI strict mode requires `required` include every key in `properties`.
+    required: ["ok", "transaction", "reason", "question"]
   }
 } as const;
 
