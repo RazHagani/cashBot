@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 import { ThemeToggle } from "./ThemeToggle";
+import { RefreshButton } from "./RefreshButton";
 
 function NavLink(props: { href: string; children: React.ReactNode }) {
   const pathname = usePathname();
@@ -58,6 +59,7 @@ export function AppHeader(props: { email?: string | null }) {
           <div className="hidden rounded-full border bg-white px-3 py-1.5 text-xs text-zinc-600 dark:border-zinc-700/60 dark:bg-zinc-900 dark:text-zinc-200 md:block">
             {props.email ?? "מחובר"}
           </div>
+          <RefreshButton />
           <ThemeToggle />
         </div>
       </div>
