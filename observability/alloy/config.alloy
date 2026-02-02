@@ -18,10 +18,8 @@ prometheus.remote_write "metrics_hosted_prometheus" {
 
 // Scrape cashBot bot metrics and forward to remote_write.
 prometheus.scrape "cashbot_bot" {
-  // Static target: one address "host:port"
-  // Hardcoded to avoid env injection issues on Railway.
-  // If you later want to make this configurable again, replace with sys.env("BOT_METRICS_TARGET").
-  targets = [{ __address__ = "passionate-wonder.railway.internal:8080" }]
+  // Bot metrics target as "host:port" (Railway private domain + :8080)
+  targets = [{ __address__ = sys.env("BOT_METRICS_TARGET") }]
 
   scrape_interval = "15s"
   scheme          = "http"
