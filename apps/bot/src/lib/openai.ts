@@ -133,11 +133,26 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
       }
     });
 
+    // Helpful confirmation (no secrets).
+    console.log(
+      "[openai] success",
+      JSON.stringify({
+        model: (res as any)?.model ?? "unknown",
+        prompt_tokens: (res as any)?.usage?.prompt_tokens ?? null,
+        completion_tokens: (res as any)?.usage?.completion_tokens ?? null,
+        total_tokens: (res as any)?.usage?.total_tokens ?? null
+      })
+    );
+
     const content = res.choices[0]?.message?.content ?? "";
     let parsed: unknown;
     try {
       parsed = JSON.parse(content);
     } catch {
+      console.warn(
+        "[openai] response not valid JSON; falling back.",
+        JSON.stringify({ sample: content.slice(0, 200) })
+      );
       return (
         basicParse(text) ?? {
           ok: false,
@@ -149,6 +164,10 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
 
     const validated = ParsedResultSchema.safeParse(parsed);
     if (!validated.success) {
+      console.warn(
+        "[openai] response failed Zod validation; falling back.",
+        JSON.stringify({ issues: validated.error.issues.slice(0, 3) })
+      );
       return (
         basicParse(text) ?? {
           ok: false,
