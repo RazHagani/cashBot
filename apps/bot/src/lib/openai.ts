@@ -7,6 +7,8 @@ function getClient() {
   return new OpenAI({ apiKey: env.OPENAI_API_KEY });
 }
 
+let warnedNoKey = false;
+
 function basicParse(text: string): ParsedResult | null {
   // Extract last number as amount (supports "20", "20.5", "20,5")
   const m = text.match(/(-?\d+(?:[.,]\d+)?)(?!.*\d)/);
@@ -97,6 +99,10 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
   try {
     const client = getClient();
     if (!client) {
+      if (!warnedNoKey) {
+        warnedNoKey = true;
+        console.warn("[openai] OPENAI_API_KEY is missing; using basicParse fallback.");
+      }
       return (
         basicParse(text) ?? {
           ok: false,
@@ -167,6 +173,16 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
     const code = e?.code ?? e?.error?.code;
     const status = e?.status ?? e?.response?.status;
     const isQuota = status === 429 || code === "insufficient_quota" || msg.includes("exceeded your current quota");
+
+    // Log useful info for debugging (without leaking secrets).
+    console.warn(
+      "[openai] request failed; falling back.",
+      JSON.stringify({
+        status: status ?? null,
+        code: code ?? null,
+        message: msg.slice(0, 200)
+      })
+    );
 
     return {
       ok: false,
