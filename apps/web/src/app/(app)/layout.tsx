@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { AppHeader } from "@/components/AppHeader";
+import { PresencePing } from "@/components/PresencePing";
 import { redirect } from "next/navigation";
 
 export default async function AppLayout({
@@ -15,6 +16,7 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen">
       <AppHeader email={user?.email} />
+      <PresencePing />
 
       <main className="mx-auto max-w-6xl px-4 py-5 md:px-6 md:py-8">
         <div className="rounded-3xl border border-zinc-200/70 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-950/80 md:p-6">
