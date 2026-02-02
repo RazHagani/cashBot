@@ -170,11 +170,6 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
     const status = e?.status ?? e?.response?.status;
     const isQuota = status === 429 || code === "insufficient_quota" || msg.includes("exceeded your current quota");
 
-    const msg = String(e?.message ?? "");
-    const code = e?.code ?? e?.error?.code;
-    const status = e?.status ?? e?.response?.status;
-    const isQuota = status === 429 || code === "insufficient_quota" || msg.includes("exceeded your current quota");
-
     // Log useful info for debugging (without leaking secrets).
     console.warn(
       "[openai] request failed; falling back.",
