@@ -209,13 +209,42 @@ export async function parseFinanceMessage(text: string): Promise<ParsedResult> {
 
     // Post-clean description (Hebrew/English fillers) to keep UX consistent.
     if (validated.data.ok) {
-      return {
+      const cleaned = {
         ...validated.data,
         transaction: {
           ...validated.data.transaction,
           description: cleanDescription(validated.data.transaction.description).slice(0, 200)
         }
       };
+
+      // Safety net:
+      // Sometimes the model returns a placeholder amount (e.g. 0.01) even when the message clearly contains a price.
+      // If our basic parser can confidently extract a real amount (>= 1), prefer it.
+      const fallback = basicParse(text);
+      if (fallback?.ok) {
+        const modelAmount = Number(cleaned.transaction.amount);
+        const basicAmount = Number(fallback.transaction.amount);
+
+        const modelLooksPlaceholder = modelAmount === 0.01 || modelAmount < 0.5;
+        const basicLooksReal = basicAmount >= 1;
+
+        if (modelLooksPlaceholder && basicLooksReal) {
+          console.warn(
+            "[openai] suspicious amount from model; using basicParse amount/description instead.",
+            JSON.stringify({ modelAmount, basicAmount })
+          );
+          return {
+            ...cleaned,
+            transaction: {
+              ...cleaned.transaction,
+              amount: basicAmount,
+              description: cleanDescription(fallback.transaction.description).slice(0, 200)
+            }
+          };
+        }
+      }
+
+      return cleaned;
     }
     return validated.data;
   } catch (e: any) {
