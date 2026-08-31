@@ -1,4 +1,4 @@
-## cashBot
+# cashBot
 Multi-user personal finance tracker with a modern web dashboard + a Telegram bot.
 
 - **Web app**: Next.js dashboard (Google OAuth, receipts, analytics)
@@ -8,10 +8,7 @@ Multi-user personal finance tracker with a modern web dashboard + a Telegram bot
 > This repo is a monorepo (npm workspaces) with `apps/web` and `apps/bot`.
 
 ### Demo
-- **Web dashboard**: (add screenshot) `docs/screenshots/dashboard.png`
-- **Grafana**: (add screenshot) `docs/screenshots/grafana.png`
-
-> Tip: add 1–2 screenshots and/or a short GIF. It’s the fastest way to make this repo “recruiter-friendly”.
+**Live**: [cash-bot-web.vercel.app](https://cash-bot-web.vercel.app)
 
 ### Key features
 - **Multi-user isolation** with **Supabase RLS** (each user can only access their own rows)
